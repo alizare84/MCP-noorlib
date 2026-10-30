@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "noorlib-mcp"
+version = "2.0.0"
+description = "MCP server for noorlib.ir (Noor Digital Library) — search, TOC, encrypted page decoding"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "noorlib-mcp contributors" }]
+keywords = ["mcp", "noorlib", "noor", "islamic", "hadith", "quran", "library"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Text Processing :: Markup :: HTML",
+]
+dependencies = [
+    "mcp>=1.2.0",
+    "httpx>=0.27",
+]
+
+[project.urls]
+Homepage = "https://noorlib.ir"
+
+[project.scripts]
+# BOTH names install the same entry point so any mcp.json works:
+#   "command": ".../.venv/bin/noor-mcp"      <- the name used in the field test
+#   "command": ".../.venv/bin/noorlib-mcp"   <- the original name
+noor-mcp = "noorlib_mcp.server:main"
+noorlib-mcp = "noorlib_mcp.server:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["noorlib_mcp"]
