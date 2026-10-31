@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "noorlib-mcp"
-version = "2.0.0"
-description = "MCP server for noorlib.ir (Noor Digital Library) — search, TOC, encrypted page decoding"
+version = "3.0.0"
+description = "عرش الرحمان — unified MCP server for the Noor family of sites: noorlib.ir (109k books, encrypted page decoding) + hadith.inoor.ir (جامع‌الاحادیث, 350+ sources)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "noorlib-mcp contributors" }]
-keywords = ["mcp", "noorlib", "noor", "islamic", "hadith", "quran", "library"]
+keywords = ["mcp", "noorlib", "noor", "arsh", "arsh-alrahman", "islamic", "hadith", "quran", "library"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -27,11 +27,13 @@ dependencies = [
 Homepage = "https://noorlib.ir"
 
 [project.scripts]
-# BOTH names install the same entry point so any mcp.json works:
+# ALL names install the same entry point so any mcp.json works:
 #   "command": ".../.venv/bin/noor-mcp"      <- the name used in the field test
 #   "command": ".../.venv/bin/noorlib-mcp"   <- the original name
+#   "command": ".../.venv/bin/arsh-alrahman" <- project name (عرش الرحمان)
 noor-mcp = "noorlib_mcp.server:main"
 noorlib-mcp = "noorlib_mcp.server:main"
+arsh-alrahman = "noorlib_mcp.server:main"
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "pytest-asyncio>=0.23"]

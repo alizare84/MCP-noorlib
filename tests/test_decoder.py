@@ -3,7 +3,7 @@ import base64
 import pytest
 
 from noorlib_mcp.decoder import DecodeError, decode_page_html
-from noorlib_mcp.textutil import html_to_text, strip_em
+from noorlib_mcp.textutil import clean_hadith_text, html_to_text, strip_em
 
 
 def _encode(plain: str, page: int) -> str:
@@ -56,3 +56,21 @@ def test_html_to_text_footnote():
 
 def test_strip_em():
     assert strip_em("نصوص <em>فصوص</em> الحكم") == "نصوص فصوص الحكم"
+
+
+def test_clean_hadith_text_nested():
+    t = (
+        "<Hadith><Document> عَنْ <Narrator> اَلْحَسَنِ</Narrator> "
+        "<Exporter><Innocent> أَبِي جَعْفَرٍ</Innocent></Exporter> قَالَ:</Document>"
+        " لَمَّا خَلَقَ اَللَّهُ اَلْعَقْلَ </Hadith>"
+    )
+    plain, structure = clean_hadith_text(t)
+    assert "لَمَّا خَلَقَ اَللَّهُ اَلْعَقْلَ" in plain
+    assert structure["Narrator"] == ["اَلْحَسَنِ"]
+    assert structure["Innocent"] == ["أَبِي جَعْفَرٍ"]
+    assert "<" not in plain
+
+
+def test_clean_hadith_text_empty():
+    assert clean_hadith_text("") == ("", {})
+    assert clean_hadith_text(None) == ("", {})
