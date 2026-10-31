@@ -1,4 +1,4 @@
-# عرش الرحمان (noorlib-mcp)
+# عر الرحمان (noorlib-mcp)
 
 [فارسی](#فارسی) | [English](#english) | [العربية](#العربية)
 
@@ -94,19 +94,6 @@ python3 -m venv .venv
 .venv/bin/pip install .
 ```
 
-## ثبت در Cursor / Claude Desktop
-
-`~/.cursor/mcp.json` (یا `.cursor/mcp.json` پروژه):
-
-```json
-{
-  "mcpServers": {
-    "noor": {
-      "command": "/home/ALIZARE84/MCP-noorlib/.venv/bin/noor-mcp"
-    }
-  }
-}
-```
 
 > **سه نام، یک برنامه:** هم `noor-mcp`، هم `noorlib-mcp` و هم `arsh-alrahman` (نام پروژه) نصب می‌شوند (هر سه به یک entry point وصل‌اند) — هر کدام را در mcp.json گذاشتید کار می‌کند. اگر قبلاً خطای `namespace "noor" not found` می‌گرفتید، دلیلش همین نام‌گذاری بود؛ الان هر سه نام موجودند.
 
