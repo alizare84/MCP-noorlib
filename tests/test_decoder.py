@@ -16,7 +16,7 @@ def _encode(plain: str, page: int) -> str:
 
 
 PLAIN_ASCII = '<div class="CODE"><p id="p1">hello world 123</p></div>'
-PLAIN_FA = '<p>خواص وحدت ذاتیه</p><p>حينئذ لا يغاير الوجوب المطلق بالذات</p>'
+PLAIN_FA = "<p>خواص وحدت ذاتیه</p><p>حينئذ لا يغاير الوجوب المطلق بالذات</p>"
 
 
 @pytest.mark.parametrize("page", [1, 5, 59, 69, 120, 300])
@@ -43,8 +43,13 @@ def test_html_to_text():
     html = '<p><span class="GPA0 bookPage PageNo5">5</span>چهل و يكم</p>'
     text = html_to_text(html)
     assert "چهل و يكم" in text
-    # lone page-number lines are dropped, inline ones stay
-    assert "70" not in html_to_text("<p>70</p>")
+    # noise classes are removed structurally (the "5" page-number span)
+    assert "PageNo" not in text
+    # bare numeric lines are CONTENT (verse numbers, years, Persian digits)
+    assert "70" in html_to_text("<p>70</p>")
+    assert "۱۲۳" in html_to_text("<p>۱۲۳</p>")
+    # only explicit page markers are noise
+    assert "p. 12" not in html_to_text("<p>p. 12</p>")
     assert "70" in html_to_text("<p>صفحه 70 مهم است</p>")
 
 
@@ -74,3 +79,11 @@ def test_clean_hadith_text_nested():
 def test_clean_hadith_text_empty():
     assert clean_hadith_text("") == ("", {})
     assert clean_hadith_text(None) == ("", {})
+
+
+def test_clean_hadith_text_with_attributes():
+    t = 'عَنْ <Narrator id="1"> اَلْحَسَنِ</Narrator> قَالَ <Exporter data-x="y">زَيْدٌ</Exporter>'
+    plain, structure = clean_hadith_text(t)
+    assert structure["Narrator"] == ["اَلْحَسَنِ"]
+    assert structure["Exporter"] == ["زَيْدٌ"]
+    assert "<" not in plain and "Narrator" not in plain

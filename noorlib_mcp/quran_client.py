@@ -14,7 +14,7 @@ Reverse-engineered from https://quran.inoor.ir/_nuxt/*.js
 
 Notes discovered by live testing:
 * /api/Search responses are DOUBLE JSON-encoded (a JSON string holding
-  JSON) — unwrapped here.
+  JSON) — unwrapped in ``_after_json`` for EVERY response, not just search.
 * /api/Ayah/ListCommentary and ListHadithWithGrouping require the FULL
   parameter set (even empty strings) or the route 404s (ASP.NET model
   binding).
@@ -23,9 +23,11 @@ Notes discovered by live testing:
 
 from __future__ import annotations
 
+import json
 import os
+from typing import Any
 
-from .httpcore import SiteClient, SiteError
+from .siteclient import SiteClient, SiteError
 
 BASE_URL = os.environ.get("QURAN_MCP_BASE_URL", "https://apiquran.inoor.ir")
 
@@ -39,22 +41,23 @@ class QuranClient(SiteClient):
             timeout=float(os.environ.get("QURAN_MCP_TIMEOUT", "30")),
             throttle=float(os.environ.get("QURAN_MCP_THROTTLE", "1.2")),
             retries=int(os.environ.get("QURAN_MCP_RETRIES", "3")),
-            headers={"Origin": "https://quran.inoor.ir",
-                     "Referer": "https://quran.inoor.ir/"},
+            headers={"Origin": "https://quran.inoor.ir", "Referer": "https://quran.inoor.ir/"},
         )
 
     # ------------------------------------------------------------- helpers
     @staticmethod
-    def _unwrap(data) -> dict:
+    def _unwrap(data: Any) -> dict:
         """apiquran sometimes returns a JSON string containing JSON."""
         if isinstance(data, str):
-            import json
-
             try:
                 data = json.loads(data)
             except ValueError:
                 return {}
         return data if isinstance(data, dict) else {}
+
+    def _after_json(self, data: Any, path: str) -> Any:
+        # every apiquran response may be double-encoded; unwrap globally
+        return self._unwrap(data)
 
     # ------------------------------------------------------------- search
     async def search(
@@ -64,8 +67,14 @@ class QuranClient(SiteClient):
         source: str = "quran",
         page_number: int = 1,
         page_size: int = 10,
+        exact: bool = False,
     ) -> dict:
-        """Search. source: 'quran' (Arabic text) or 'translation'."""
+        """Search. source: 'quran' (Arabic text) or 'translation'.
+
+        exact=True disables root/stem/synonym expansion so only verses
+        containing the literal word(s) are returned.
+        """
+        expand = "false" if exact else "true"
         data = await self.get(
             "/api/Search/AutoComplete",
             params={
@@ -73,23 +82,21 @@ class QuranClient(SiteClient):
                 "pageNumber": page_number,
                 "pageSize": page_size,
                 "source": source,
-                "root": "true",
-                "stem": "true",
-                "synonym": "true",
+                "root": expand,
+                "stem": expand,
+                "synonym": expand,
                 "searchType": "all",
                 "type": "search",
                 "exec": "true",
                 "sort": "rank_desc",
             },
         )
-        d = self._unwrap(data).get("data") or {}
+        d = data.get("data") or {}
         return d if isinstance(d, dict) else {}
 
     # -------------------------------------------------------------- surah
     async def surahs(self) -> list[dict]:
-        data = await self.get(
-            "/api/Surah/ListSurahLight", params={"language": "fa"}
-        )
+        data = await self.get("/api/Surah/ListSurahLight", params={"language": "fa"})
         rows = data.get("Data") or []
         return rows if isinstance(rows, list) else []
 
@@ -110,6 +117,8 @@ class QuranClient(SiteClient):
         *,
         page_number: int = 1,
         page_size: int = 10,
+        book_ids: str = "",
+        language_ids: str = "",
     ) -> dict:
         data = await self.get(
             "/api/Ayah/ListTranslate",
@@ -120,8 +129,8 @@ class QuranClient(SiteClient):
                 "pageNumber": page_number,
                 "pageSize": page_size,
                 "order": 0,
-                "bookIds": "",
-                "languageIds": "",
+                "bookIds": book_ids or "",
+                "languageIds": language_ids or "",
                 "religionIds": "",
             },
         )
@@ -135,11 +144,14 @@ class QuranClient(SiteClient):
         *,
         page_number: int = 1,
         page_size: int = 10,
+        book_ids: str = "",
+        author_ids: str = "",
     ) -> dict:
         data = await self.get(
             "/api/Ayah/ListCommentary",
-            params=self._full_params(surah_id, ayah_number,
-                                      page_number, page_size),
+            params=self._full_params(
+                surah_id, ayah_number, page_number, page_size, book_ids, author_ids
+            ),
         )
         d = data.get("Data") or {}
         return d if isinstance(d, dict) else {}
@@ -151,23 +163,28 @@ class QuranClient(SiteClient):
         *,
         page_number: int = 1,
         page_size: int = 10,
+        book_ids: str = "",
+        author_ids: str = "",
     ) -> dict:
         data = await self.get(
             "/api/Ayah/ListHadithWithGrouping",
-            params=self._full_params(surah_id, ayah_number,
-                                      page_number, page_size),
+            params=self._full_params(
+                surah_id, ayah_number, page_number, page_size, book_ids, author_ids
+            ),
         )
         d = data.get("Data") or {}
         return d if isinstance(d, dict) else {}
 
     @staticmethod
-    def _full_params(surah_id, ayah_number, page_number, page_size) -> dict:
+    def _full_params(
+        surah_id, ayah_number, page_number, page_size, book_ids: str = "", author_ids: str = ""
+    ) -> dict:
         # ASP.NET model binding: every route param must be present, even
         # when empty, otherwise the route does not match.
         return {
-            "authorIds": "",
+            "authorIds": author_ids or "",
             "ayahNumber": ayah_number,
-            "bookIds": "",
+            "bookIds": book_ids or "",
             "centuryIds": "",
             "commentaryTypeIds": "",
             "language": "fa",
@@ -181,9 +198,7 @@ class QuranClient(SiteClient):
 
     # -------------------------------------------------------------- stats
     async def statistics(self) -> dict:
-        data = await self.get(
-            "/api/Home/GetDataStatistics/", params={"language": "fa"}
-        )
+        data = await self.get("/api/Home/GetDataStatistics/", params={"language": "fa"})
         return data.get("Data") or {}
 
 

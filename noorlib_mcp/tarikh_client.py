@@ -15,15 +15,19 @@ from __future__ import annotations
 
 import os
 
-from .httpcore import SiteClient, SiteError
+from .siteclient import SiteClient, SiteError
 
 BASE_URL = os.environ.get("TARIKH_MCP_BASE_URL", "https://tarikh.inoor.ir")
 
 
-def decode_tarikh_date(code) -> str:
+def decode_tarikh_date(code, calendar: str = "قمری") -> str:
     """360520 -> '36/05/20 قمری' ; 8570520 -> '857/05/20 قمری'.
 
     Format is YY..YYMMDD (year of varying length, then month, then day).
+    ``calendar`` labels the assumed calendar — the search API sends
+    DateType=all, so a neutral label can be passed when the source
+    calendar of a row is unknown. Codes shorter than 5 digits are
+    ambiguous and returned raw, WITHOUT any calendar label.
     """
     try:
         code = int(code or 0)
@@ -34,7 +38,7 @@ def decode_tarikh_date(code) -> str:
     s = str(code)
     if len(s) >= 5:
         day, month, year = s[-2:], s[-4:-2], s[:-4]
-        return f"{year}/{month}/{day} قمری"
+        return f"{year}/{month}/{day} {calendar}"
     return s
 
 
@@ -56,6 +60,10 @@ class TarikhClient(SiteClient):
         *,
         page_number: int = 1,
         page_size: int = 10,
+        event_type_id: int = 0,
+        source_id: int = 0,
+        start_date: int = 0,
+        end_date: int = 0,
     ) -> dict:
         data = await self.get(
             "/api/event/List",
@@ -66,15 +74,15 @@ class TarikhClient(SiteClient):
                 "DateType": "all",
                 "SortItem": "rank",
                 "SortType": "desc",
-                "StartDate": 0,
-                "EndDate": 0,
+                "StartDate": start_date,
+                "EndDate": end_date,
                 "StartDateMMDD": 0,
                 "EndDateMMDD": 0,
                 "Priority": 0,
                 "HasPicture": "false",
                 "SearchIn": "title,comment,text",
-                "EventTypeId": 0,
-                "SourceId": 0,
+                "EventTypeId": event_type_id,
+                "SourceId": source_id,
                 "UserLanguage": "fa",
                 "IsAdvance": "false",
             },

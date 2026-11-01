@@ -12,8 +12,9 @@ action API at https://fa.wikinoor.ir/w/api.php:
 from __future__ import annotations
 
 import os
+from typing import Any
 
-from .httpcore import SiteClient, SiteError
+from .siteclient import SiteClient, SiteError
 
 BASE_URL = os.environ.get("WIKINOOR_MCP_BASE_URL", "https://fa.wikinoor.ir")
 
@@ -30,6 +31,13 @@ class WikinoorClient(SiteClient):
             headers={"Referer": BASE_URL + "/"},
         )
         self._api = "/w/api.php"
+
+    def _after_json(self, data: Any, path: str) -> Any:
+        # MediaWiki answers HTTP 200 with an "error" body for failures
+        if isinstance(data, dict) and data.get("error"):
+            err = data["error"]
+            raise SiteError(f"[wikinoor] MediaWiki error {err.get('code')}: {err.get('info')}")
+        return data
 
     async def _api_get(self, **params) -> dict:
         params["format"] = "json"
@@ -58,9 +66,7 @@ class WikinoorClient(SiteClient):
 
     # --------------------------------------------------------------- stats
     async def statistics(self) -> dict:
-        data = await self._api_get(
-            action="query", meta="siteinfo", siprop="statistics"
-        )
+        data = await self._api_get(action="query", meta="siteinfo", siprop="statistics")
         return (data.get("query") or {}).get("statistics") or {}
 
 

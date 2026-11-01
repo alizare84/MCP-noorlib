@@ -10,143 +10,69 @@ Endpoints (reverse-engineered from https://noorlib.ir/_nuxt/*.js):
     POST /api/search/bookSearchPhrasePageList {origin, language, query, sp.book_id, ...}
     POST /api/search/pageSearchPhrase        {origin, language, query, sp.book_id, sp.page, ...}
 
-Design notes for the three field-reported issues:
+Design notes:
 
 * Proxy — many Iranian networks run a local proxy (http_proxy=127.0.0.1:10808)
   that MITMs and breaks TLS to noorlib.ir.  By default the client IGNORES the
-  ambient proxy environment (trust_env=False) and connects directly, because
-  noorlib.ir is reachable directly and its certificate is valid.  Set
-  ``NOORLIB_MCP_USE_PROXY=1`` to honour http_proxy/https_proxy/no_proxy again.
-* Error text — every network failure now embeds the underlying exception text
-  (previously messages looked like ``transport error:`` with no detail).
-* Paywall — page reads consume credit for non-free ranges.  The response's
-  ``validation`` block is surfaced verbatim, and an optional bearer token
-  (``NOORLIB_MCP_AUTH``) is sent on every call so authenticated users with
-  credit can read full pages.
+  ambient proxy environment (trust_env=False) and connects directly.  Set
+  ``NOORLIB_MCP_USE_PROXY=1`` (or ``NOOR_MCP_USE_PROXY=1``) to honour
+  http_proxy/https_proxy/no_proxy again.
+* Auth — an optional bearer token (``NOORLIB_MCP_AUTH``) is sent on every
+  call so authenticated users with reading credit can fetch full pages.
+* Errors — every failure raises NoorlibError with the real cause
+  (type + message); site response bodies are labeled untrusted.
 """
 
 from __future__ import annotations
 
-import asyncio
 import os
-import time
 from typing import Any
 
-import httpx
+from .siteclient import SiteClient, SiteError
 
 BASE_URL = os.environ.get("NOORLIB_MCP_BASE_URL", "https://noorlib.ir")
 TIMEOUT = float(os.environ.get("NOORLIB_MCP_TIMEOUT", "30"))
 THROTTLE = float(os.environ.get("NOORLIB_MCP_THROTTLE", "1.2"))
 RETRIES = int(os.environ.get("NOORLIB_MCP_RETRIES", "3"))
 
-_UA = (
-    "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0"
-)
 
-
-class NoorlibError(RuntimeError):
+class NoorlibError(SiteError):
     """Any failure while talking to noorlib.ir."""
 
 
-class NoorlibClient:
+class NoorlibClient(SiteClient):
+    name = "noorlib"
+    error = NoorlibError
+
     def __init__(self, auth_token: str | None = None) -> None:
         self._auth = auth_token or os.environ.get("NOORLIB_MCP_AUTH", "")
-        use_proxy = os.environ.get("NOORLIB_MCP_USE_PROXY", "").strip() in (
-            "1", "true", "TRUE", "yes",
-        )
-        headers = {
-            "User-Agent": _UA,
+        headers: dict[str, str] = {
             "Origin": BASE_URL,
             "Referer": BASE_URL + "/",
-            "Accept": "application/json, text/plain, */*",
         }
         if self._auth:
             token = self._auth.strip()
             if not token.lower().startswith("bearer"):
                 token = "Bearer " + token
             headers["Authorization"] = token
-        # trust_env=False -> ignore http_proxy/https_proxy/ALL_PROXY unless
-        # explicitly opted-in via NOORLIB_MCP_USE_PROXY (fixes the local
-        # MITM proxy breaking TLS while still allowing opt-in).
-        self._client = httpx.AsyncClient(
-            base_url=BASE_URL,
-            headers=headers,
+        super().__init__(
+            BASE_URL,
             timeout=TIMEOUT,
-            trust_env=use_proxy,
-            verify=True,
-            follow_redirects=True,
+            throttle=THROTTLE,
+            retries=RETRIES,
+            headers=headers,
         )
-        self._last_request = 0.0
-        self._lock = asyncio.Lock()
+
+    def _after_json(self, data: Any, path: str) -> Any:
+        if isinstance(data, dict):
+            if data.get("isSuccess") is False and data.get("statusCode") not in (200, None):
+                raise self.error(f"API error from {path}: {data.get('message') or data}")
+        return data
 
     # ------------------------------------------------------------- plumbing
-    async def _throttle(self) -> None:
-        async with self._lock:
-            now = time.monotonic()
-            wait = THROTTLE - (now - self._last_request)
-            if wait > 0:
-                await asyncio.sleep(wait)
-            self._last_request = time.monotonic()
-
-    async def _request(self, method: str, path: str, **kw: Any) -> dict:
-        payload = kw.pop("payload", None)
-        params = kw.pop("params", None)
-        last_exc: Exception | None = None
-        last_body: str = ""
-
-        for attempt in range(1, RETRIES + 1):
-            await self._throttle()
-            try:
-                if method == "POST":
-                    resp = await self._client.post(path, json=payload)
-                else:
-                    resp = await self._client.get(path, params=params)
-            except httpx.HTTPError as exc:
-                # include the real cause (SSL/EOF/connect) — the previous
-                # build dropped this text and printed an empty detail.
-                raise NoorlibError(
-                    f"network error calling {method} {path} "
-                    f"(attempt {attempt}/{RETRIES}): {type(exc).__name__}: {exc} "
-                    f"— hint: noorlib.ir is reachable directly; if a local proxy "
-                    f"(http_proxy) breaks TLS, this client already ignores it "
-                    f"unless NOORLIB_MCP_USE_PROXY=1 is set"
-                ) from exc
-
-            if resp.status_code == 429 or 500 <= resp.status_code < 600:
-                last_body = resp.text[:300]
-                last_exc = NoorlibError(
-                    f"server busy (HTTP {resp.status_code}) on attempt "
-                    f"{attempt}/{RETRIES}"
-                )
-                await asyncio.sleep(min(2.0 * attempt, 6.0))
-                continue
-            if resp.status_code != 200:
-                raise NoorlibError(
-                    f"HTTP {resp.status_code} from {path}: {resp.text[:300]}"
-                )
-            try:
-                data = resp.json()
-            except ValueError as exc:
-                raise NoorlibError(
-                    f"non-JSON response from {path}: {resp.text[:300]}"
-                ) from exc
-            if data.get("isSuccess") is False and data.get("statusCode") not in (200, None):
-                raise NoorlibError(
-                    f"API error from {path}: {data.get('message') or data}"
-                )
-            return data
-
-        raise NoorlibError(
-            f"request failed after {RETRIES} attempts: {last_exc} "
-            f"last body: {last_body}"
-        )
-
     @staticmethod
     def _svc() -> dict:
         return {"origin": "noorlib.web.app", "language": "fa"}
-
-    async def close(self) -> None:
-        await self._client.aclose()
 
     # ------------------------------------------------------------- endpoints
     async def book_info(self, book_id: int) -> dict:
@@ -156,6 +82,8 @@ class NoorlibClient:
             "/api/book/getGeneralBookInfo",
             payload={**self._svc(), "bookId": book_id, "type": "metadata"},
         )
+        if not isinstance(data, dict):
+            return {}
         return data.get("data") or {}
 
     async def book_toc(
@@ -174,9 +102,9 @@ class NoorlibClient:
         }
         if parent_node_id is not None:
             params["parentNodeId"] = parent_node_id
-        data = await self._request(
-            "GET", "/api/book/getBookTOC", params=params
-        )
+        data = await self._request("GET", "/api/book/getBookTOC", params=params)
+        if not isinstance(data, dict):
+            return {"nodes": [], "totalCount": 0}
         return {
             "nodes": data.get("data") or [],
             "totalCount": data.get("totalCount", 0),
@@ -203,8 +131,12 @@ class NoorlibClient:
                 "pageNumber": page_number,
             },
         )
-        pages = data.get("data") or []
-        return pages[0] if pages else {}
+        pages = data.get("data") if isinstance(data, dict) else None
+        if isinstance(pages, dict):
+            return pages
+        if isinstance(pages, list) and pages:
+            return pages[0]
+        return {}
 
     async def search(
         self,
@@ -232,9 +164,9 @@ class NoorlibClient:
             payload["sp.creator_id"] = creator_id
         if subject_id is not None:
             payload["sp.subject_ids"] = subject_id
-        data = await self._request(
-            "POST", "/api/search/generalSearchPhrase", payload=payload
-        )
+        data = await self._request("POST", "/api/search/generalSearchPhrase", payload=payload)
+        if not isinstance(data, dict):
+            return {}
         return data.get("data") or {}
 
     async def search_in_book(
@@ -258,13 +190,18 @@ class NoorlibClient:
         }
         if volume_number is not None:
             payload["sp.volume_number"] = volume_number
-        data = await self._request(
-            "POST", "/api/search/bookSearchPhrasePageList", payload=payload
-        )
+        data = await self._request("POST", "/api/search/bookSearchPhrasePageList", payload=payload)
+        if not isinstance(data, dict):
+            return {}
         return data.get("data") or {}
 
     async def find_pages(
-        self, book_id: int, query: str, volume_number: int = 1
+        self,
+        book_id: int,
+        query: str,
+        volume_number: int = 1,
+        page_size: int = 25,
+        page_number: int = 1,
     ) -> list[dict]:
         """Cheap word-index lookup: pages containing the query words."""
         payload = {
@@ -272,10 +209,13 @@ class NoorlibClient:
             "query": query,
             "sp.book_id": book_id,
             "sp.volume": volume_number,
-            "page_size": 25,
-            "page_number": 1,
+            "page_size": page_size,
+            "page_number": page_number,
         }
-        data = await self._request(
-            "POST", "/api/search/pageSearchPhrase", payload=payload
-        )
+        data = await self._request("POST", "/api/search/pageSearchPhrase", payload=payload)
+        if not isinstance(data, dict):
+            return []
         return (data.get("data") or {}).get("resultList") or []
+
+
+__all__ = ["NoorlibClient", "NoorlibError"]

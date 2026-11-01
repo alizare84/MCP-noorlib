@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import os
 
-from .httpcore import SiteClient, SiteError
+from .siteclient import SiteClient, SiteError
 
 BASE_URL = os.environ.get("NOORDOC_MCP_BASE_URL", "https://noordoc.ir")
 
@@ -73,9 +73,7 @@ class NoordocClient(SiteClient):
         return d if isinstance(d, dict) else {}
 
     async def thesis_pages(self, thesis_id: int, limit: int = 20) -> list[dict]:
-        data = await self.get(
-            "/_content/api/v1/page", params={"ThesisId": thesis_id}
-        )
+        data = await self.get("/_content/api/v1/page", params={"ThesisId": thesis_id})
         items = (data.get("data") or {}).get("items") or []
         return items[:limit] if isinstance(items, list) else []
 

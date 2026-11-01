@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import os
 
-from .httpcore import SiteClient, SiteError
+from .siteclient import SiteClient, SiteError
 
 BASE_URL = os.environ.get("QAMUS_MCP_BASE_URL", "https://qamus-api.inoor.ir")
 
@@ -53,7 +53,8 @@ class QamusClient(SiteClient):
         conformity: int = 1,
     ) -> dict:
         if category not in _CATEGORIES:
-            category = "vocabulary"
+            # a silently-wrong category would give the model wrong results
+            raise ValueError(f"category must be one of {_CATEGORIES}, got {category!r}")
         data = await self.post(
             f"/{category}",
             payload={
@@ -84,9 +85,7 @@ class QamusClient(SiteClient):
 
     # ------------------------------------------------------------- suggest
     async def autocomplete(self, word: str, lang: str = "fa") -> list[dict]:
-        data = await self.get(
-            "/AutoComplete", params={"lang": lang, "word": word}
-        )
+        data = await self.get("/AutoComplete", params={"lang": lang, "word": word})
         rows = data.get("data") or []
         return rows if isinstance(rows, list) else []
 

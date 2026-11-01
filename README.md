@@ -2,256 +2,249 @@
 
 [فارسی](#فارسی) | [English](#english) | [العربية](#العربية)
 
-## فارسی
+سرور MCP برای هفت پایگاه خانوادهٔ نور. جستجو، فهرست، متن، ترجمه و تفسیر از یک ورودی در اختیار عامل زبانی قرار می‌گیرد.
 
-**یک سرور MCP واحد برای هفت پایگاه خانواده نور** — جستجو، فهرست، متن کامل، ترجمه و تفسیر، همه با رمزگشایی و پاکسازی خودکار.
+این پروژه مستقل است و از رابط عمومی همان وب‌سایت‌ها استفاده می‌کند. با کتابخانهٔ `mcp` نسخهٔ ۱ و ۲ سازگار است.
+
+## فارسی
 
 | پایگاه | پوشش | ابزارها |
 |---|---|---|
-| **noorlib.ir** — کتابخانه دیجیتال نور | ۱۰۹ هزار کتاب، ۱۵۱ هزار جلد | ۶ ابزار `noorlib_*` |
-| **hadith.inoor.ir** — جامع‌الاحادیث | ۳۵۵+ منبع حدیثی | ۴ ابزار `hadith_*` |
+| **noorlib.ir** — کتابخانهٔ دیجیتال نور | ۱۰۹ هزار کتاب، ۱۵۱ هزار جلد | ۶ ابزار `noorlib_*` |
+| **hadith.inoor.ir** — جامع‌الاحادیث | ۳۵۵+ منبع حدیثی | ۵ ابزار `hadith_*` |
 | **quran.inoor.ir** — پایگاه جامع قرآنی | متن + ۱۵۶ ترجمه + ۴۱۷ تفسیر | ۶ ابزار `quran_*` |
-| **wikinoor.ir** — دانشنامه ویکی‌نور | ۳۳ هزار مقاله کتاب‌شناسی/زندگی‌نامه | ۲ ابزار `wikinoor_*` |
-| **qamus.inoor.ir** — لغت‌نامه قاموس نور | ۳۶۹ هزار واژه، ۱۶۳ فرهنگ | ۳ ابزار `qamus_*` |
-| **noordoc.ir** — پایگاه پایان‌نامه‌ها | ۱۴۹ هزار پایان‌نامه | ۲ ابزار `noordoc_*` |
-| **tarikh.inoor.ir** — پایگاه جامع تاریخ | صدها هزار رویداد تاریخی | ۳ ابزار `tarikh_*` |
+| **wikinoor.ir** — دانشنامهٔ ویکی‌نور | ۳۳ هزار مقالهٔ کتاب‌شناسی و زندگی‌نامه | ۲ ابزار `wikinoor_*` |
+| **qamus.inoor.ir** — لغت‌نامهٔ قاموس نور | ۳۶۹ هزار واژه، ۱۶۳ فرهنگ | ۴ ابزار `qamus_*` |
+| **noordoc.ir** — پایگاه پایان‌نامه‌ها | ۱۴۹ هزار پایان‌نامه | ۳ ابزار `noordoc_*` |
+| **tarikh.inoor.ir** — پایگاه جامع تاریخ | صدها هزار رویداد | ۳ ابزار `tarikh_*` |
 
-> ابزار غیررسمی است و از API عمومی وب‌سایت‌های خانواده نور استفاده می‌کند.
->
-> **سازگاری:** با هر دو نسل کتابخانه `mcp` کار می‌کند — نسخه 1.x (`FastMCP`) و 2.x (`MCPServer`).
-
-## ۲۶ ابزار
-
-### noorlib.ir — کتابخانه دیجیتال
+### ابزارها
 
 | ابزار | کار |
 |---|---|
-| `noorlib_search` | جستجوی کلی در کل کتابخانه (عنوان/مؤلف/اسنیپت) |
-| `noorlib_book_info` | متادیتای کتاب (عنوان، پدیدآور، جلد، رایگان؟) |
-| `noorlib_book_toc` | فهرست مطالب درختی + `zone` (بازه صفحه هر بخش) |
-| `noorlib_book_page` | متن کامل یک صفحه (رمزگشایی + متن ساده + تصویر اسکن) |
-| `noorlib_search_in_book` | جستجو داخل یک کتاب → اسنیپت + شماره صفحه/بخش |
-| `noorlib_find_pages` | ایندکس سریع: صفحه‌های حاوی کلمات |
+| `noorlib_search` | جستجو در عنوان، پدیدآور و اسنیپت |
+| `noorlib_book_info` | شناسنامهٔ کتاب، جلدها و وضعیت دسترسی |
+| `noorlib_book_toc` | فهرست درختی و بازهٔ صفحهٔ هر بخش (`zone`) |
+| `noorlib_book_page` | متن خوانای یک صفحه، و تصویر اسکن در صورت وجود |
+| `noorlib_search_in_book` | جستجو داخل یک کتاب، با شمارهٔ صفحه و بخش |
+| `noorlib_find_pages` | صفحه‌های حاوی عبارت، با صفحه‌بندی |
+| `hadith_search` | جستجوی حدیث، با فیلتر منبع و ترجمه و شرح |
+| `hadith_by_id` | متن، سند، مسیر کتاب و باب، و نقل در منابع دیگر |
+| `hadith_sources` | فهرست منابع و `sourceId` |
+| `hadith_toc` | فهرست یک منبع حدیثی |
+| `hadith_related` | حدیث‌های مشابه |
+| `quran_search` | جستجو در متن یا ترجمه؛ `exact=true` برای تطبیق لفظی |
+| `quran_surahs` | ۱۱۴ سوره و تعداد آیات |
+| `quran_surah_text` | بازهٔ آیات یک سوره، با سقف خروجی |
+| `quran_ayah_translations` | ترجمه‌های یک آیه |
+| `quran_ayah_commentary` | تفسیرهای یک آیه |
+| `quran_ayah_hadiths` | احادیث مرتبط با یک آیه |
+| `wikinoor_search` | جستجوی مقاله |
+| `wikinoor_page` | متن مقاله و جعبهٔ اطلاعات |
+| `qamus_search` | جستجوی واژه، اصطلاح یا نام |
+| `qamus_word` | معنی کامل، ریشه، جمع و مثال |
+| `qamus_dictionaries` | فهرست فرهنگ‌ها |
+| `qamus_autocomplete` | پیشنهاد املا |
+| `noordoc_search` | جستجوی پایان‌نامه |
+| `noordoc_thesis` | چکیده و مشخصات |
+| `noordoc_thesis_pages` | فهرست صفحات موجود |
+| `tarikh_search` | جستجوی رویداد |
+| `tarikh_event` | شرح رویداد و منابع گزارش |
+| `tarikh_today` | رویدادهای امروز در تقویم قمری |
 
-### hadith.inoor.ir — جامع‌الاحادیث
-
-| ابزار | کار |
-|---|---|
-| `hadith_search` | جستجوی متن حدیث (با فیلتر منبع: کافی/بحار/وسائل...) |
-| `hadith_by_id` | متن کامل حدیث + سند + مسیر کتاب/باب + همان حدیث در منابع دیگر |
-| `hadith_sources` | فهرست ۳۵۵+ منبع حدیثی با sourceId |
-| `hadith_toc` | فهرست مطالب یک منبع حدیثی |
-
-### quran.inoor.ir — قرآن
-
-| ابزار | کار |
-|---|---|
-| `quran_search` | جستجو در متن عربی آیات یا ترجمه‌ها (source=quran/translation) |
-| `quran_surahs` | فهرست ۱۱۴ سوره با تعداد آیات |
-| `quran_surah_text` | متن کامل یک سوره (۴ خط: عثمان طه/ساده/املایی/مصحف ایران) |
-| `quran_ayah_translations` | ترجمه‌های یک آیه از ۱۵۶ ترجمه |
-| `quran_ayah_commentary` | تفسیرهای یک آیه (المیزان، نور الثقلین...) — متن کامل |
-| `quran_ayah_hadiths` | احادیث مرتبط با آیه (hadithId → hadith_by_id) |
-
-### wikinoor.ir — دانشنامه
-
-| ابزار | کار |
-|---|---|
-| `wikinoor_search` | جستجوی مقالات (کتاب‌شناسی/زندگی‌نامه) |
-| `wikinoor_page` | متن کامل مقاله + جعبه اطلاعات ساختاری (پدیدآور، ناشر، کد noorlib) |
-
-### qamus.inoor.ir — لغت‌نامه
-
-| ابزار | کار |
-|---|---|
-| `qamus_search` | جستجوی واژه/اصطلاح/نام با معانی |
-| `qamus_word` | معانی کامل واژه (ریشه، جمع، مثال) |
-| `qamus_dictionaries` | فهرست ۱۶۳ فرهنگ موجود |
-
-### noordoc.ir — پایان‌نامه‌ها
-
-| ابزار | کار |
-|---|---|
-| `noordoc_search` | جستجوی پایان‌نامه (دانشگاه، مقطع، سال، استاد) |
-| `noordoc_thesis` | چکیده + جزئیات کامل پایان‌نامه |
-
-### tarikh.inoor.ir — تاریخ
-
-| ابزار | کار |
-|---|---|
-| `tarikh_search` | جستجوی رویدادهای تاریخی |
-| `tarikh_event` | شرح کامل رویداد + منابع گزارش (با لینک noorlib) |
-| `tarikh_today` | رویدادهای امروز (تقویم قمری) |
-
-## نصب
+### استفاده
 
 ```bash
-# در پروژه MCP خودتان (پوشه‌ای مثل MCP-noorlib)
 cd ~/MCP-noorlib
 python3 -m venv .venv
-.venv/bin/pip install noorlib_mcp-3.0.0-py3-none-any.whl
-# یا از سورس:
-.venv/bin/pip install .
+.venv/bin/pip install -e .
 ```
 
+سه فرمان `noor-mcp`، `noorlib-mcp` و `arsh-alrahman` همان سرور را اجرا می‌کنند. در پیکربندی کلاینت MCP مسیر مطلق یکی از آن‌ها را بگذارید:
 
-> **سه نام، یک برنامه:** هم `noor-mcp`، هم `noorlib-mcp` و هم `arsh-alrahman` (نام پروژه) نصب می‌شوند (هر سه به یک entry point وصل‌اند) — هر کدام را در mcp.json گذاشتید کار می‌کند. اگر قبلاً خطای `namespace "noor" not found` می‌گرفتید، دلیلش همین نام‌گذاری بود؛ الان هر سه نام موجودند.
+```json
+{
+  "mcpServers": {
+    "noor": {
+      "command": "/ABSOLUTE/PATH/MCP-noorlib/.venv/bin/noor-mcp",
+      "env": {
+        "NOORLIB_MCP_AUTH": "Bearer eyJ..."
+      }
+    }
+  }
+}
+```
 
-بعد از تغییر mcp.json، **Cursor را کامل ببندید و دوباره باز کنید** (نه فقط Reload) تا سرور MCP بالا بیاید.
+اگر توکن لازم نیست، کلید `env` را حذف کنید. پس از هر تغییر، کلاینت MCP را یک‌بار کاملاً ببندید و دوباره باز کنید.
 
-## متغیرهای محیطی
+مسیر معمول کار این است: جستجو، سپس شناسه، سپس متن. برای کتاب، `noorlib_search` و بعد `noorlib_book_info` و `noorlib_book_toc` و در نهایت `noorlib_book_page`. شمارهٔ صفحه داخل بخش شمرده می‌شود، نه در کل کتاب. `sectionNumber` را از فیلد `zone` در خروجی فهرست بردارید. وقتی متن کامل لازم نیست، `noorlib_search_in_book` اسنیپت را بدون کسر اعتبار برمی‌گرداند.
 
-هر پایگاه پیشوند خودش را دارد (`QURAN_MCP_*`, `WIKINOOR_MCP_*`, `QAMUS_MCP_*`, `NOORDOC_MCP_*`, `TARIKH_MCP_*`, `HADITH_MCP_*`, `NOORLIB_MCP_*`) با این کلیدها: `BASE_URL`, `TIMEOUT`, `THROTTLE`, `RETRIES`.
+### اعتبار مطالعه در نور
 
-مشترک:
+جستجو، شناسنامه، فهرست و اسنیپت بدون ورود در دسترس است. متن کامل بعضی صفحه‌ها از اعتبار مطالعهٔ همان حساب کسر می‌شود. اگر اعتبار کافی نباشد، سرور پیام خود نور را برمی‌گرداند: «اعتبار کافی جهت کسر شارژ مطالعه صفحه وجود ندارد».
 
-| متغیر | پیش‌فرض | توضیح |
+1. در [noorlib.ir](https://noorlib.ir) وارد حساب شوید.
+2. در [افزایش اعتبار](https://noorlib.ir/package) یکی از اشتراک‌های یک‌ساله را بخرید. سهم مطالعه روی همان صفحه نوشته شده است: عادی ۱۵۰۰ صفحه، نقره‌ای ۴۵۰۰ صفحه، طلایی ۱۲۰۰۰ صفحه. پرداخت به همان حساب وصل می‌شود.
+3. در همان مرورگر ابزار توسعه‌دهنده را باز کنید. در Chrome و Edge زبانهٔ Application، و در Firefox زبانهٔ Storage را انتخاب کنید. زیر Local Storage برای `https://noorlib.ir` مقدار `auth._token.inoor` را کپی کنید. این مقدار معمولاً با `Bearer eyJ` شروع می‌شود.
+4. آن را در `NOORLIB_MCP_AUTH` بگذارید. اگر پیشوند `Bearer` را ننوشته باشید، سرور خودش اضافه می‌کند.
+5. کلاینت MCP را کاملاً از نو راه‌اندازی کنید.
+
+تا وقتی اشتراکی خریداری نشده باشد، موجودی صفر است و صفحهٔ مشمول اعتبار باز نمی‌شود. توکن را در گفتگو، مخزن یا تصویر منتشر نکنید. نام کاربری به‌تنهایی برای سرور کافی نیست.
+
+پایان‌نامه‌ها در noordoc تا سطح چکیده و فهرست صفحات در دسترس‌اند. فایل صفحه و PDF از این سرور ارائه نمی‌شود. پایگاه‌های دیگر در مسیر معمولی این پروژه به توکن نیاز ندارند.
+
+### متغیرهای محیطی
+
+هر پایگاه پیشوند خودش را دارد: `NOORLIB_MCP_`، `HADITH_MCP_`، `QURAN_MCP_`، `WIKINOOR_MCP_`، `QAMUS_MCP_`، `NOORDOC_MCP_` و `TARIKH_MCP_`. کلیدهای مشترک `BASE_URL`، `TIMEOUT`، `THROTTLE` و `RETRIES` هستند.
+
+| متغیر | پیش‌فرض | نقش |
 |---|---|---|
-| `NOORLIB_MCP_AUTH` | خالی | توکن لاگین noorlib (`Bearer eyJ...`) برای صفحات شارژی |
-| `HADITH_MCP_AUTH` | خالی | توکن لاگین حدیث (معمولاً لازم نیست) |
-| `NOORLIB_MCP_USE_PROXY` | `0` | `1` = استفاده از http_proxy/https_proxy سیستم |
-| `NOORLIB_MCP_LOG` | `INFO` | `DEBUG` برای لاگ کامل |
+| `NOORLIB_MCP_AUTH` | خالی | توکن حساب نور برای صفحه‌های مشمول اعتبار |
+| `HADITH_MCP_AUTH` | خالی | توکن پایگاه حدیث؛ معمولاً لازم نیست |
+| `NOORLIB_MCP_USE_PROXY` | `0` | `1` یعنی پروکسی سیستم استفاده شود. `NOOR_MCP_USE_PROXY` هم پذیرفته است |
+| `NOORLIB_MCP_CA_BUNDLE` | خالی | مسیر بستهٔ گواهی سازمانی |
+| `NOORLIB_MCP_UA` | عامل مرورگر | عامل کاربر دلخواه |
+| `NOORLIB_MCP_LOG` | `INFO` | `DEBUG` برای گزارش مفصل |
 
-> **سیاست پروکسی:** همه کلاینت‌ها پیش‌فرض پروکسی محیطی را نادیده می‌گیرند (`trust_env=False`) تا پروکسی خراب محلی (مثل 127.0.0.1:10808) سرور را زمین نزند؛ با `NOORLIB_MCP_USE_PROXY=1` فعال می‌شود.
+پروکسی محیطی به‌طور پیش‌فرض نادیده گرفته می‌شود.
 
+### شناسه‌های پرکاربرد
 
-## کاتالوگ سریع (bookId noorlib)
+تمهید القواعد ۱۳۲۷ · شرح فصوص الحکم ۱۳۱۲ · نصوص الخصوص ۱۱۰۱۵ · کشف المراد ۱۲۳۶ · توضیح المراد ۱۱۹۸ · شوارق الإلهام ۱۴۱۵۹ · منشور جاودانه ۵۵۲۰۲ · نهج‌البلاغه ۳۵۴۲ · بحارالانوار ۲۵۶۴ · تجلیات الهیه ۱۲۲۷۶۲ · اسرار عرشیه ۱۲۲۷۶۰
 
-تمهید القواعد 1327 · شرح فصوص الحکم 1312 · نصوص الخصوص 11015 · کشف المراد 1236 · توضیح المراد 1198 · شوارق الإلهام 14159 · منشور جاودانه 55202 · نهج‌البلاغه 3542 · بحارالانوار 2564 · تجلیات الهیه 122762 · اسرار عرشیه 122760
+الکافی، متن کامل هشت جلد: **۱۳۴۸** · نهج‌البلاغة: ۱۵۷۵ · ترجمهٔ اصول کافی: ۲۶۴۶ · الروضة من الکافی: ۲۶۴۲
 
-### sourceIdهای پرکاربرد hadith.inoor.ir
-
-الکافی (کلینی) — متن کامل ۸ جلد: **1348** · نهج‌البلاغة: 1575 · ترجمه اصول کافی: 2646 · الروضة من الکافی: 2642
-
-
-## توسعه
+### توسعه
 
 ```bash
 pip install -e ".[dev]"
 pytest
 ```
 
-ساختار:
-
 ```
 noorlib_mcp/
-├── client.py         # httpx async client noorlib + throttle/retry/auth/proxy
-├── hadith_client.py  # httpx async client hadith.inoor.ir
-├── httpcore.py       # هسته HTTP مشترک (throttle/retry/proxy-safe)
-├── quran_client.py   # apiquran.inoor.ir
-├── wikinoor_client.py# MediaWiki API
-├── qamus_client.py   # qamus-api.inoor.ir
-├── noordoc_client.py # noordoc.ir (_search/_content)
-├── tarikh_client.py  # tarikh.inoor.ir
-├── decoder.py        # رمزگشایی صفحه (base64 → char-swap → shift)
-├── server.py         # ۲۶ ابزار MCP (۷ پایگاه)
-└── textutil.py       # HTML/wikitext → متن ساده + پاکسازی حدیث
+├── server.py
+├── siteclient.py
+├── client.py
+├── hadith_client.py
+├── quran_client.py
+├── wikinoor_client.py
+├── qamus_client.py
+├── noordoc_client.py
+├── tarikh_client.py
+├── textutil.py
+└── decoder.py
 ```
 
 ## English
 
-**One MCP server for seven Noor-family databases.** Search, browse, and retrieve text, translations, and commentary, with automatic decoding and cleanup.
+One MCP server for the seven Noor-family databases. An agent can search, browse, and read text, translations, and commentary through a single connection.
 
 | Site | Coverage | Tools |
 |---|---|---|
-| **noorlib.ir** — Noor Digital Library | 109,000 books, 151,000 volumes | 6 `noorlib_*` tools |
-| **hadith.inoor.ir** — Comprehensive Hadith | 355+ hadith sources | 4 `hadith_*` tools |
-| **quran.inoor.ir** — Quran database | Quran text, 156 translations, 417 commentaries | 6 `quran_*` tools |
-| **wikinoor.ir** — Wikinoor encyclopedia | 33,000 bibliographic and biographical articles | 2 `wikinoor_*` tools |
-| **qamus.inoor.ir** — Qamus dictionary | 369,000 entries, 163 dictionaries | 3 `qamus_*` tools |
-| **noordoc.ir** — Thesis database | 149,000 theses | 2 `noordoc_*` tools |
-| **tarikh.inoor.ir** — Historical events | Hundreds of thousands of events | 3 `tarikh_*` tools |
+| **noorlib.ir** | 109,000 books, 151,000 volumes | 6 `noorlib_*` |
+| **hadith.inoor.ir** | 355+ hadith sources | 5 `hadith_*` |
+| **quran.inoor.ir** | Text, 156 translations, 417 commentaries | 6 `quran_*` |
+| **wikinoor.ir** | 33,000 bibliographic and biographical articles | 2 `wikinoor_*` |
+| **qamus.inoor.ir** | 369,000 entries, 163 dictionaries | 4 `qamus_*` |
+| **noordoc.ir** | 149,000 theses | 3 `noordoc_*` |
+| **tarikh.inoor.ir** | Hundreds of thousands of events | 3 `tarikh_*` |
 
-> This unofficial project uses the public APIs of Noor-family websites.
->
-> **Compatibility:** Supports both generations of the `mcp` SDK: 1.x (`FastMCP`) and 2.x (`MCPServer`).
+### Tools
 
-### All 26 tools
+| Tool | Purpose |
+|---|---|
+| `noorlib_search` | Search by title, author, or snippet |
+| `noorlib_book_info` | Book metadata and access flags |
+| `noorlib_book_toc` | Table of contents and per-section page ranges |
+| `noorlib_book_page` | Readable text of one page, plus a scan image when present |
+| `noorlib_search_in_book` | Snippets inside one book, with page and section |
+| `noorlib_find_pages` | Pages containing the query |
+| `hadith_search` | Search hadith text, with source, translation, and commentary filters |
+| `hadith_by_id` | Full text, chain, book path, and the same hadith in other sources |
+| `hadith_sources` | Source catalogue and `sourceId` |
+| `hadith_toc` | Table of contents of one source |
+| `hadith_related` | Similar hadiths |
+| `quran_search` | Search the Arabic text or translations; `exact=true` for a literal match |
+| `quran_surahs` | The 114 surahs and their verse counts |
+| `quran_surah_text` | A verse range, with an output cap |
+| `quran_ayah_translations` | Translations of one verse |
+| `quran_ayah_commentary` | Commentaries on one verse |
+| `quran_ayah_hadiths` | Hadiths related to one verse |
+| `wikinoor_search` | Search articles |
+| `wikinoor_page` | Article text and infobox |
+| `qamus_search` | Search a word, term, or name |
+| `qamus_word` | Full entry, root, plural, and examples |
+| `qamus_dictionaries` | Dictionary catalogue |
+| `qamus_autocomplete` | Spelling suggestions |
+| `noordoc_search` | Search theses |
+| `noordoc_thesis` | Abstract and record |
+| `noordoc_thesis_pages` | Page inventory |
+| `tarikh_search` | Search events |
+| `tarikh_event` | Event description and cited sources |
+| `tarikh_today` | Events for the current Hijri date |
 
-| Site | Tool | Description |
-|---|---|---|
-| noorlib.ir | `noorlib_search` | Search books by title, author, or snippet |
-| noorlib.ir | `noorlib_book_info` | Book metadata and availability flags |
-| noorlib.ir | `noorlib_book_toc` | Hierarchical table of contents and page ranges |
-| noorlib.ir | `noorlib_book_page` | Read and decode a book page; return scan images when present |
-| noorlib.ir | `noorlib_search_in_book` | Search within a book and return snippets and page locations |
-| noorlib.ir | `noorlib_find_pages` | Find pages containing query terms |
-| hadith.inoor.ir | `hadith_search` | Search hadith text and optionally filter by source |
-| hadith.inoor.ir | `hadith_by_id` | Full hadith, chain, book path, and related-source records |
-| hadith.inoor.ir | `hadith_sources` | List hadith sources and their IDs |
-| hadith.inoor.ir | `hadith_toc` | Browse a source's table of contents |
-| quran.inoor.ir | `quran_search` | Search Quran text or translations |
-| quran.inoor.ir | `quran_surahs` | List the 114 surahs and verse counts |
-| quran.inoor.ir | `quran_surah_text` | Retrieve a surah in a selected orthography |
-| quran.inoor.ir | `quran_ayah_translations` | Retrieve translations of a verse |
-| quran.inoor.ir | `quran_ayah_commentary` | Retrieve verse commentaries, including Al-Mizan |
-| quran.inoor.ir | `quran_ayah_hadiths` | Find hadith groups related to a verse |
-| wikinoor.ir | `wikinoor_search` | Search bibliographic and biographical articles |
-| wikinoor.ir | `wikinoor_page` | Retrieve article text and structured infobox fields |
-| qamus.inoor.ir | `qamus_search` | Search words, terms, or names and their meanings |
-| qamus.inoor.ir | `qamus_word` | Retrieve full word details and meanings |
-| qamus.inoor.ir | `qamus_dictionaries` | List available dictionaries |
-| noordoc.ir | `noordoc_search` | Search theses by title and metadata |
-| noordoc.ir | `noordoc_thesis` | Retrieve a thesis abstract and metadata |
-| tarikh.inoor.ir | `tarikh_search` | Search historical events |
-| tarikh.inoor.ir | `tarikh_event` | Retrieve an event description and cited sources |
-| tarikh.inoor.ir | `tarikh_today` | List events for the current Hijri date |
-
-### Installation
+### Use
 
 ```bash
 cd ~/MCP-noorlib
 python3 -m venv .venv
-.venv/bin/pip install noorlib_mcp-3.0.0-py3-none-any.whl
-# Or install from source:
-.venv/bin/pip install .
+.venv/bin/pip install -e .
 ```
 
-### Configure Cursor or Claude Desktop
-
-Add the server to `~/.cursor/mcp.json` or the project's `.cursor/mcp.json`:
+`noor-mcp`, `noorlib-mcp`, and `arsh-alrahman` start the same server. Point the MCP client at the absolute path of one of them:
 
 ```json
 {
   "mcpServers": {
     "noor": {
-      "command": "/home/USERNAME/MCP-noorlib/.venv/bin/noor-mcp"
+      "command": "/ABSOLUTE/PATH/MCP-noorlib/.venv/bin/noor-mcp",
+      "env": {
+        "NOORLIB_MCP_AUTH": "Bearer eyJ..."
+      }
     }
   }
 }
 ```
 
-The `noor-mcp`, `noorlib-mcp`, and `arsh-alrahman` commands all launch the same server. Use the full path to the command. After changing the MCP configuration, fully restart Cursor or Claude Desktop.
+Omit `env` when no token is required. Restart the MCP client completely after any change.
 
-### Environment variables
+The usual path is search, then an identifier, then the text. For a book: `noorlib_search`, `noorlib_book_info`, `noorlib_book_toc`, then `noorlib_book_page`. A page number counts inside its section, not across the book. Take `sectionNumber` from the `zone` field of the table of contents. `noorlib_search_in_book` returns snippets without spending study credit.
 
-Each site accepts its own `BASE_URL`, `TIMEOUT`, `THROTTLE`, and `RETRIES` variables, prefixed with `QURAN_MCP_`, `WIKINOOR_MCP_`, `QAMUS_MCP_`, `NOORDOC_MCP_`, `TARIKH_MCP_`, `HADITH_MCP_`, or `NOORLIB_MCP_`.
+### Noor study credit
 
-| Variable | Default | Description |
+Search, metadata, tables of contents, and snippets do not require a sign-in. The full text of some pages is charged to the account’s study credit. When the balance is insufficient, the server returns Noor’s own message: «اعتبار کافی جهت کسر شارژ مطالعه صفحه وجود ندارد».
+
+1. Sign in at [noorlib.ir](https://noorlib.ir).
+2. Buy an annual plan on the [credit page](https://noorlib.ir/package). The page states the allowance: Standard 1,500 pages, Silver 4,500 pages, Gold 12,000 pages. The balance is attached to that account.
+3. In the same browser, open the developer tools. Use Application in Chrome and Edge, or Storage in Firefox. Under Local Storage for `https://noorlib.ir`, copy `auth._token.inoor`. It usually begins with `Bearer eyJ`.
+4. Set that value as `NOORLIB_MCP_AUTH`. The server adds the `Bearer` prefix when it is missing.
+5. Restart the MCP client completely.
+
+A valid token with an empty balance still cannot open a charged page. Do not publish the token in a chat, a repository, or a screenshot. A username alone is not accepted.
+
+Noordoc exposes thesis metadata, abstracts, and page inventories. Page files and PDFs are not served. The other databases do not require a token on the flows this server documents.
+
+### Environment
+
+Each site has its own prefix: `NOORLIB_MCP_`, `HADITH_MCP_`, `QURAN_MCP_`, `WIKINOOR_MCP_`, `QAMUS_MCP_`, `NOORDOC_MCP_`, and `TARIKH_MCP_`. Shared keys are `BASE_URL`, `TIMEOUT`, `THROTTLE`, and `RETRIES`.
+
+| Variable | Default | Role |
 |---|---|---|
-| `NOORLIB_MCP_AUTH` | empty | Noorlib bearer token for pages that require study credit |
-| `HADITH_MCP_AUTH` | empty | Hadith-site bearer token; usually not needed |
-| `NOORLIB_MCP_USE_PROXY` | `0` | Set to `1` to honor system `http_proxy`/`https_proxy` settings |
-| `NOORLIB_MCP_LOG` | `INFO` | Set to `DEBUG` for detailed logs |
+| `NOORLIB_MCP_AUTH` | empty | Noor account token for pages that spend study credit |
+| `HADITH_MCP_AUTH` | empty | Hadith-site token; usually unnecessary |
+| `NOORLIB_MCP_USE_PROXY` | `0` | `1` uses the system proxy. `NOOR_MCP_USE_PROXY` is also accepted |
+| `NOORLIB_MCP_CA_BUNDLE` | empty | Corporate CA bundle |
+| `NOORLIB_MCP_UA` | browser agent | Custom user agent |
+| `NOORLIB_MCP_LOG` | `INFO` | `DEBUG` for a detailed log |
 
-All clients ignore proxy environment variables by default (`trust_env=False`). Set `NOORLIB_MCP_USE_PROXY=1` to opt in.
+Ambient proxy variables are ignored unless the proxy option is turned on.
 
-### Access and payment
+### Frequent identifiers
 
-- **Noorlib:** Search snippets are free. Reading some full book pages may consume study credit; set `NOORLIB_MCP_AUTH` to a logged-in bearer token for eligible pages. The server returns the site's validation message when credit is required.
-- **Noordoc:** Search results, thesis metadata, abstracts, and page inventory are exposed. The thesis page content (PDF/images) requires a paid account and is intentionally not exposed.
-- The other integrations do not require payment or authentication in this project's documented API flows. The websites' own terms and access policies still apply.
+Tamhid al-Qawaid 1327 · Sharh Fusus al-Hikam 1312 · Nusus al-Khusus 11015 · Kashf al-Murad 1236 · Tawdih al-Murad 1198 · Shawariq al-Ilham 14159 · Manshur-i Javidana 55202 · Nahj al-Balagha 3542 · Bihar al-Anwar 2564 · Tajalliyat al-Ilahiyya 122762 · Asrar-i Arshiyya 122760
 
-For Noorlib, `page_number` is counted within a section, not across the whole book. Get `sectionNumber` from the `zone` field returned by `noorlib_book_toc`.
-
-### Technical notes
-
-- Noorlib page decoding: URL-safe Base64 → UTF-8 → swap adjacent characters → subtract the page number from each character code. Swapping Unicode characters (not bytes) preserves Persian and Arabic text.
-- Quran search responses are double-encoded JSON. Commentary and related-hadith endpoints require the full parameter set.
-- Wikinoor uses the standard MediaWiki API; article text is converted from wikitext and infobox fields are extracted.
-- Qamus word details require the `X-Api-Version: 2` header.
-- Noordoc thesis file contents are behind a paid aggregator endpoint and are not exposed by this server.
-- Tarikh event dates use a variable-length Hijri year followed by month and day.
+Al-Kafi, complete eight volumes: **1348** · Nahj al-Balagha: 1575 · translation of Usul al-Kafi: 2646 · al-Rawda min al-Kafi: 2642
 
 ### Development
 
@@ -260,112 +253,117 @@ pip install -e ".[dev]"
 pytest
 ```
 
-The package is organized around one client per site, a shared HTTP core for the lighter APIs, `server.py` for MCP tools, and `textutil.py`/`decoder.py` for content cleanup and Noorlib page decoding.
+The package is one client per site, a shared HTTP core in `siteclient.py`, the MCP tools in `server.py`, and text cleanup in `textutil.py` and `decoder.py`.
 
 ## العربية
 
-**خادم MCP واحد لقواعد بيانات عائلة نور السبع.** يوفّر البحث والتصفّح واسترجاع النصوص والترجمات والتفاسير، مع فك الترميز والتنظيف تلقائياً.
+خادم MCP واحد لقواعد عائلة نور السبع. يصل الوكيل إلى البحث والفهرس والنص والترجمة والتفسير من اتصال واحد.
 
 | الموقع | المحتوى | الأدوات |
 |---|---|---|
-| **noorlib.ir** — مكتبة نور الرقمية | 109 آلاف كتاب و151 ألف مجلد | 6 أدوات `noorlib_*` |
-| **hadith.inoor.ir** — جامع الأحاديث | أكثر من 355 مصدراً حديثياً | 4 أدوات `hadith_*` |
-| **quran.inoor.ir** — قاعدة القرآن | نص القرآن و156 ترجمة و417 تفسيراً | 6 أدوات `quran_*` |
-| **wikinoor.ir** — موسوعة ويكي نور | 33 ألف مقالة ببليوغرافية وسِيَرية | أداتان `wikinoor_*` |
-| **qamus.inoor.ir** — قاموس نور | 369 ألف مدخل و163 معجماً | 3 أدوات `qamus_*` |
-| **noordoc.ir** — قاعدة الرسائل الجامعية | 149 ألف رسالة | أداتان `noordoc_*` |
-| **tarikh.inoor.ir** — قاعدة التاريخ | مئات آلاف الأحداث التاريخية | 3 أدوات `tarikh_*` |
+| **noorlib.ir** | 109 آلاف كتاب و151 ألف مجلد | 6 أدوات `noorlib_*` |
+| **hadith.inoor.ir** | أكثر من 355 مصدراً حديثياً | 5 أدوات `hadith_*` |
+| **quran.inoor.ir** | النص و156 ترجمة و417 تفسيراً | 6 أدوات `quran_*` |
+| **wikinoor.ir** | 33 ألف مقالة ببليوغرافية وسِيَرية | أداتان `wikinoor_*` |
+| **qamus.inoor.ir** | 369 ألف مدخل و163 معجماً | 4 أدوات `qamus_*` |
+| **noordoc.ir** | 149 ألف رسالة | 3 أدوات `noordoc_*` |
+| **tarikh.inoor.ir** | مئات آلاف الأحداث | 3 أدوات `tarikh_*` |
 
-> هذا مشروع غير رسمي يستخدم واجهات API العامة لمواقع عائلة نور.
->
-> **التوافق:** يدعم الإصدارين الرئيسيين من مكتبة `mcp`: الإصدار 1.x (`FastMCP`) والإصدار 2.x (`MCPServer`).
+### الأدوات
 
-### الأدوات الـ 26
+| الأداة | الوظيفة |
+|---|---|
+| `noorlib_search` | البحث بالعنوان أو المؤلف أو المقتطف |
+| `noorlib_book_info` | بيانات الكتاب وحالة الإتاحة |
+| `noorlib_book_toc` | الفهرس ونطاق صفحات كل قسم |
+| `noorlib_book_page` | نص الصفحة بصيغة مقروءة، مع صورة المسح إن وُجدت |
+| `noorlib_search_in_book` | مقتطفات داخل كتاب مع رقم الصفحة والقسم |
+| `noorlib_find_pages` | الصفحات التي تحتوي عبارة البحث |
+| `hadith_search` | البحث في الحديث مع تصفية المصدر والترجمة والشرح |
+| `hadith_by_id` | النص والسند ومسار الكتاب ووروده في مصادر أخرى |
+| `hadith_sources` | قائمة المصادر ومعرّف `sourceId` |
+| `hadith_toc` | فهرس مصدر حديثي |
+| `hadith_related` | الأحاديث المشابهة |
+| `quran_search` | البحث في النص أو الترجمة؛ `exact=true` للتطابق اللفظي |
+| `quran_surahs` | السور الـ 114 وعدد آياتها |
+| `quran_surah_text` | نطاق آيات مع سقف للخرج |
+| `quran_ayah_translations` | ترجمات آية |
+| `quran_ayah_commentary` | تفاسير آية |
+| `quran_ayah_hadiths` | أحاديث مرتبطة بآية |
+| `wikinoor_search` | البحث في المقالات |
+| `wikinoor_page` | نص المقال وصندوق المعلومات |
+| `qamus_search` | البحث عن كلمة أو مصطلح أو اسم |
+| `qamus_word` | المدخل الكامل مع الجذر والجمع والأمثلة |
+| `qamus_dictionaries` | قائمة المعاجم |
+| `qamus_autocomplete` | اقتراح الإملاء |
+| `noordoc_search` | البحث في الرسائل |
+| `noordoc_thesis` | الملخص والبيانات |
+| `noordoc_thesis_pages` | جرد الصفحات |
+| `tarikh_search` | البحث في الأحداث |
+| `tarikh_event` | شرح الحدث ومصادره |
+| `tarikh_today` | أحداث اليوم بالتقويم الهجري |
 
-| الموقع | الأداة | الوصف |
-|---|---|---|
-| noorlib.ir | `noorlib_search` | البحث عن الكتب بالعنوان أو المؤلف أو المقتطف |
-| noorlib.ir | `noorlib_book_info` | بيانات الكتاب ومؤشرات توفره |
-| noorlib.ir | `noorlib_book_toc` | فهرس هرمي ونطاقات الصفحات |
-| noorlib.ir | `noorlib_book_page` | قراءة صفحة وفك ترميزها، وإرجاع صور المسح عند وجودها |
-| noorlib.ir | `noorlib_search_in_book` | البحث داخل كتاب وإرجاع المقتطفات ومواضع الصفحات |
-| noorlib.ir | `noorlib_find_pages` | العثور على الصفحات التي تحتوي كلمات البحث |
-| hadith.inoor.ir | `hadith_search` | البحث في نص الحديث مع إمكانية التصفية حسب المصدر |
-| hadith.inoor.ir | `hadith_by_id` | نص الحديث وسنده ومساره في الكتاب ومواضعه في مصادر أخرى |
-| hadith.inoor.ir | `hadith_sources` | عرض مصادر الحديث ومعرّفاتها |
-| hadith.inoor.ir | `hadith_toc` | تصفح فهرس مصدر حديثي |
-| quran.inoor.ir | `quran_search` | البحث في نص القرآن أو الترجمات |
-| quran.inoor.ir | `quran_surahs` | عرض السور الـ 114 وعدد آياتها |
-| quran.inoor.ir | `quran_surah_text` | استرجاع نص سورة برسم مختار |
-| quran.inoor.ir | `quran_ayah_translations` | استرجاع ترجمات آية |
-| quran.inoor.ir | `quran_ayah_commentary` | استرجاع تفاسير الآية، ومنها تفسير الميزان |
-| quran.inoor.ir | `quran_ayah_hadiths` | العثور على مجموعات الأحاديث المرتبطة بآية |
-| wikinoor.ir | `wikinoor_search` | البحث في المقالات الببليوغرافية والسِيَرية |
-| wikinoor.ir | `wikinoor_page` | استرجاع نص المقال وحقول صندوق المعلومات المنظّمة |
-| qamus.inoor.ir | `qamus_search` | البحث عن الكلمات أو المصطلحات أو الأسماء ومعانيها |
-| qamus.inoor.ir | `qamus_word` | استرجاع تفاصيل الكلمة ومعانيها كاملة |
-| qamus.inoor.ir | `qamus_dictionaries` | عرض المعاجم المتاحة |
-| noordoc.ir | `noordoc_search` | البحث عن الرسائل الجامعية وبياناتها |
-| noordoc.ir | `noordoc_thesis` | استرجاع ملخص الرسالة وبياناتها |
-| tarikh.inoor.ir | `tarikh_search` | البحث عن الأحداث التاريخية |
-| tarikh.inoor.ir | `tarikh_event` | استرجاع شرح الحدث ومصادره |
-| tarikh.inoor.ir | `tarikh_today` | عرض أحداث اليوم حسب التقويم الهجري |
-
-### التثبيت
+### الاستخدام
 
 ```bash
 cd ~/MCP-noorlib
 python3 -m venv .venv
-.venv/bin/pip install noorlib_mcp-3.0.0-py3-none-any.whl
-# أو التثبيت من المصدر:
-.venv/bin/pip install .
+.venv/bin/pip install -e .
 ```
 
-### إعداد Cursor أو Claude Desktop
-
-أضف الخادم إلى `~/.cursor/mcp.json` أو إلى `.cursor/mcp.json` داخل المشروع:
+الأوامر `noor-mcp` و`noorlib-mcp` و`arsh-alrahman` تشغّل الخادم نفسه. ضع في إعداد عميل MCP المسار المطلق لأحدها:
 
 ```json
 {
   "mcpServers": {
     "noor": {
-      "command": "/home/USERNAME/MCP-noorlib/.venv/bin/noor-mcp"
+      "command": "/ABSOLUTE/PATH/MCP-noorlib/.venv/bin/noor-mcp",
+      "env": {
+        "NOORLIB_MCP_AUTH": "Bearer eyJ..."
+      }
     }
   }
 }
 ```
 
-الأوامر `noor-mcp` و`noorlib-mcp` و`arsh-alrahman` تشغّل الخادم نفسه. استخدم المسار الكامل للأمر، ثم أعد تشغيل Cursor أو Claude Desktop بالكامل بعد تعديل الإعدادات.
+احذف `env` إذا لم يكن الرمز مطلوباً. بعد أي تعديل، أغلق عميل MCP تماماً ثم افتحه من جديد.
+
+المسار المعتاد هو البحث، ثم المعرّف، ثم النص. للكتاب: `noorlib_search` ثم `noorlib_book_info` ثم `noorlib_book_toc` ثم `noorlib_book_page`. يُحسب رقم الصفحة داخل القسم لا على مستوى الكتاب. خذ `sectionNumber` من الحقل `zone` في الفهرس. وتعيد `noorlib_search_in_book` المقتطفات من غير خصم رصيد.
+
+### رصيد القراءة في نور
+
+البحث وبيانات الكتاب والفهرس والمقتطفات لا تحتاج إلى دخول. النص الكامل لبعض الصفحات يُخصم من رصيد القراءة في الحساب. إذا لم يكفِ الرصيد، يعيد الخادم رسالة نور نفسها: «اعتبار کافی جهت کسر شارژ مطالعه صفحه وجود ندارد».
+
+1. ادخل إلى حسابك في [noorlib.ir](https://noorlib.ir).
+2. اشترِ أحد الاشتراكات السنوية من [صفحة الرصيد](https://noorlib.ir/package). الحصة مكتوبة في الصفحة نفسها: العادي ١٥٠٠ صفحة، والفضي ٤٥٠٠ صفحة، والذهبي ١٢٠٠٠ صفحة. الرصيد مرتبط بذلك الحساب.
+3. في المتصفح نفسه افتح أدوات المطوّر. اختر Application في Chrome وEdge، أو Storage في Firefox. من Local Storage لـ `https://noorlib.ir` انسخ قيمة `auth._token.inoor`. تبدأ عادةً بـ `Bearer eyJ`.
+4. ضعها في `NOORLIB_MCP_AUTH`. يضيف الخادم البادئة `Bearer` إذا غابت.
+5. أعد تشغيل عميل MCP إغلاقاً كاملاً ثم فتحاً.
+
+الرمز الصحيح مع رصيد صفري لا يفتح صفحة مخصومة. لا تنشر الرمز في محادثة أو مستودع أو لقطة شاشة. اسم المستخدم وحده لا يكفي.
+
+تُتاح في noordoc بيانات الرسالة وملخصها وجرد صفحاتها. ملفات الصفحات وPDF غير متاحة من هذا الخادم. لا تحتاج قواعد البيانات الأخرى إلى رمز في المسارات الموثّقة هنا.
 
 ### متغيرات البيئة
 
-لكل موقع المتغيرات `BASE_URL` و`TIMEOUT` و`THROTTLE` و`RETRIES` مع بادئة خاصة به: `QURAN_MCP_` أو `WIKINOOR_MCP_` أو `QAMUS_MCP_` أو `NOORDOC_MCP_` أو `TARIKH_MCP_` أو `HADITH_MCP_` أو `NOORLIB_MCP_`.
+لكل موقع بادئة: `NOORLIB_MCP_` و`HADITH_MCP_` و`QURAN_MCP_` و`WIKINOOR_MCP_` و`QAMUS_MCP_` و`NOORDOC_MCP_` و`TARIKH_MCP_`. المفاتيح المشتركة هي `BASE_URL` و`TIMEOUT` و`THROTTLE` و`RETRIES`.
 
-| المتغير | القيمة الافتراضية | الوصف |
+| المتغير | الافتراضي | الدور |
 |---|---|---|
-| `NOORLIB_MCP_AUTH` | فارغ | رمز Bearer لحساب نورلایب لقراءة الصفحات التي تتطلب رصيد دراسة |
-| `HADITH_MCP_AUTH` | فارغ | رمز Bearer لموقع الحديث؛ غالباً لا يلزم |
-| `NOORLIB_MCP_USE_PROXY` | `0` | اضبطه على `1` لاستخدام إعدادات `http_proxy` و`https_proxy` للنظام |
-| `NOORLIB_MCP_LOG` | `INFO` | اضبطه على `DEBUG` للحصول على سجلات مفصلة |
+| `NOORLIB_MCP_AUTH` | فارغ | رمز حساب نور للصفحات التي تستهلك رصيد القراءة |
+| `HADITH_MCP_AUTH` | فارغ | رمز موقع الحديث؛ غالباً غير لازم |
+| `NOORLIB_MCP_USE_PROXY` | `0` | `1` يستخدم بروكسي النظام. `NOOR_MCP_USE_PROXY` مقبول أيضاً |
+| `NOORLIB_MCP_CA_BUNDLE` | فارغ | حزمة الشهادات المؤسسية |
+| `NOORLIB_MCP_UA` | متصفح | وكيل مستخدم مخصص |
+| `NOORLIB_MCP_LOG` | `INFO` | `DEBUG` لسجل مفصّل |
 
-تتجاهل جميع العملاء متغيرات البروكسي افتراضياً (`trust_env=False`). اضبط `NOORLIB_MCP_USE_PROXY=1` لتفعيلها.
+تُتجاهل متغيرات البروكسي ما لم يُفعَّل الخيار.
 
-### الوصول والدفع
+### معرّفات متكررة
 
-- **نورلایب:** مقتطفات نتائج البحث مجانية. قد تتطلب قراءة بعض صفحات الكتب رصيد دراسة؛ ضع رمز Bearer لحساب مسجّل في `NOORLIB_MCP_AUTH` للصفحات المؤهلة. يعيد الخادم رسالة التحقق الصادرة عن الموقع عند الحاجة إلى رصيد.
-- **نورداك:** البحث وبيانات الرسائل والملخصات وفهرس الصفحات متاحة. أما محتوى صفحات الرسالة (ملفات PDF والصور) فيتطلب حساباً مدفوعاً، ولذلك لا يقدمه هذا الخادم.
-- لا يتطلب استخدام واجهات المواقع الأخرى في تدفقات هذا المشروع دفعاً أو مصادقة. تظل شروط الوصول وسياسات المواقع نفسها سارية.
+تمهيد القواعد ١٣٢٧ · شرح فصوص الحكم ١٣١٢ · نصوص الخصوص ١١٠١٥ · كشف المراد ١٢٣٦ · توضيح المراد ١١٩٨ · شوارق الإلهام ١٤١٥٩ · منشور جاودانه ٥٥٢٠٢ · نهج البلاغة ٣٥٤٢ · بحار الأنوار ٢٥٦٤ · تجليات إلهية ١٢٢٧٦٢ · أسرار عرشية ١٢٢٧٦٠
 
-في نورلایب، يُحسب `page_number` داخل القسم لا على مستوى الكتاب كله. خذ `sectionNumber` من الحقل `zone` الذي تعيده الأداة `noorlib_book_toc`.
-
-### ملاحظات تقنية
-
-- فك صفحات نورلایب: Base64 آمن لعناوين URL ← UTF-8 ← تبديل الأحرف المتجاورة ← طرح رقم الصفحة من رمز كل حرف. يجري التبديل على محارف Unicode لا على البايتات للحفاظ على النص العربي والفارسي.
-- استجابات البحث في القرآن مشفّرة بصيغة JSON مرتين. وتتطلب واجهات التفسير والأحاديث المرتبطة جميع المعاملات.
-- يستخدم ويكي نور واجهة MediaWiki القياسية؛ ويُنظّف نص المقال المستخرج من wikitext وتُستخرج حقول صندوق المعلومات.
-- تتطلب تفاصيل الكلمات في قاموس نور الترويسة `X-Api-Version: 2`.
-- محتوى ملفات الرسائل في نورداك خلف واجهة وسيطة مدفوعة ولا يتيحه هذا الخادم.
-- تواريخ أحداث موقع التاريخ تتكون من سنة هجرية متغيرة الطول يتبعها الشهر واليوم.
+الكافي، النص الكامل في ثمانية مجلدات: **١٣٤٨** · نهج البلاغة: ١٥٧٥ · ترجمة أصول الكافي: ٢٦٤٦ · الروضة من الكافي: ٢٦٤٢
 
 ### التطوير
 
@@ -374,4 +372,4 @@ pip install -e ".[dev]"
 pytest
 ```
 
-تتضمن الحزمة عميلاً لكل موقع، ونواة HTTP مشتركة للواجهات الأخف، وملف `server.py` لأدوات MCP، وملفي `textutil.py` و`decoder.py` لتنظيف المحتوى وفك صفحات نورلایب.
+الحزمة عميل لكل موقع، ونواة HTTP مشتركة في `siteclient.py`، وأدوات MCP في `server.py`، وتنظيف النص في `textutil.py` و`decoder.py`.

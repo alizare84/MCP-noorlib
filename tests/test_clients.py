@@ -5,10 +5,10 @@ import pytest
 
 from noorlib_mcp.client import NoorlibClient
 from noorlib_mcp.hadith_client import HadithClient
-from noorlib_mcp.httpcore import SiteClient
 from noorlib_mcp.noordoc_client import NoordocClient
 from noorlib_mcp.qamus_client import QamusClient
 from noorlib_mcp.quran_client import QuranClient
+from noorlib_mcp.siteclient import SiteClient
 from noorlib_mcp.tarikh_client import TarikhClient, decode_tarikh_date
 from noorlib_mcp.wikinoor_client import WikinoorClient
 
@@ -70,9 +70,7 @@ async def test_hadith_search_posts_source_filter(monkeypatch):
     )
     client = HadithClient()
     try:
-        result = await client.search(
-            "العقل", page_number=2, page_size=5, source_ids=[1348]
-        )
+        result = await client.search("العقل", page_number=2, page_size=5, source_ids=[1348])
     finally:
         await client.close()
 
@@ -95,9 +93,7 @@ async def test_quran_search_unwraps_double_encoded_response(monkeypatch):
     )
     client = QuranClient()
     try:
-        result = await client.search(
-            "نور", source="translation", page_number=3, page_size=8
-        )
+        result = await client.search("نور", source="translation", page_number=3, page_size=8)
     finally:
         await client.close()
 
@@ -114,9 +110,7 @@ async def test_quran_search_unwraps_double_encoded_response(monkeypatch):
 async def test_quran_commentary_sends_required_empty_filters(monkeypatch):
     requests = _mock_transport(
         monkeypatch,
-        lambda request: httpx.Response(
-            200, json={"Data": {"ResultSet1": [{"Text": "tafsir"}]}}
-        ),
+        lambda request: httpx.Response(200, json={"Data": {"ResultSet1": [{"Text": "tafsir"}]}}),
     )
     client = QuranClient()
     try:
@@ -140,9 +134,7 @@ async def test_quran_commentary_sends_required_empty_filters(monkeypatch):
 async def test_wikinoor_search_and_page_use_mediawiki_api(monkeypatch):
     def respond(request):
         if request.url.params["action"] == "query":
-            return httpx.Response(
-                200, json={"query": {"search": [{"title": "فصوص الحکم"}]}}
-            )
+            return httpx.Response(200, json={"query": {"search": [{"title": "فصوص الحکم"}]}})
         return httpx.Response(
             200,
             json={
@@ -188,9 +180,7 @@ async def test_qamus_search_body_and_word_version_header(monkeypatch):
     client = QamusClient()
     client.throttle = 0
     try:
-        search = await client.search(
-            "نور", category="term", page_index=2, page_limit=6
-        )
+        search = await client.search("نور", category="term", page_index=2, page_limit=6)
         word = await client.word("4J781M")
     finally:
         await client.close()
@@ -226,9 +216,7 @@ async def test_noordoc_search_filters_and_thesis_detail(monkeypatch):
     client = NoordocClient()
     client.throttle = 0
     try:
-        search = await client.search(
-            "عرفان", organization="university", education_level="phd"
-        )
+        search = await client.search("عرفان", organization="university", education_level="phd")
         thesis = await client.thesis(17)
     finally:
         await client.close()
@@ -284,7 +272,7 @@ async def test_shared_http_core_retries_server_errors(monkeypatch):
     async def no_sleep(_delay):
         return None
 
-    monkeypatch.setattr("noorlib_mcp.httpcore.asyncio.sleep", no_sleep)
+    monkeypatch.setattr("noorlib_mcp.siteclient.asyncio.sleep", no_sleep)
     client = SiteClient("https://example.test", throttle=0, retries=2)
     try:
         result = await client.get("/resource")

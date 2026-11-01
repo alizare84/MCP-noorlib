@@ -3,127 +3,66 @@
 Reverse-engineered from https://hadith.inoor.ir/main.*.js and live traffic
 (xr_settings.serviceUrl = https://hadith.inoor.ir/service):
 
-    POST /api/elastic/v2/ElasticHadithList  — main search (text + filters)
-    POST /api/elastic/ElasticHadithById     — full hadith text by id list
-    POST /api/elastic/SourceList            — all hadith sources (350+)
-    GET  /api/hadith/TocListBySource        — TOC of one source
-    POST /api/elastic/RelatedHadith         — similar hadiths
-    POST /api/hadith/HadithSimilarList      — similar list
-    POST /api/elastic/SameTocHadith         — hadiths under same TOC node
+    POST /service/api/elastic/v2/ElasticHadithList  — main search (text + filters)
+    POST /service/api/elastic/ElasticHadithById     — full hadith text by id list
+    POST /service/api/elastic/SourceList            — all hadith sources (350+)
+    GET  /service/api/hadith/TocListBySource        — TOC of one source
+    POST /service/api/elastic/RelatedHadith         — similar hadiths
 
 Proxy policy mirrors noorlib_mcp.client: ambient http_proxy is IGNORED by
-default (NOORLIB_MCP_USE_PROXY=1 opts in) and errors carry full detail.
+default (NOORLIB_MCP_USE_PROXY=1 or NOOR_MCP_USE_PROXY=1 opts in).
 """
 
 from __future__ import annotations
 
-import asyncio
 import os
-import time
 from typing import Any
 
-import httpx
+from .siteclient import SiteClient, SiteError
 
 BASE_URL = os.environ.get("HADITH_MCP_BASE_URL", "https://hadith.inoor.ir")
-SERVICE = BASE_URL + "/service"
 TIMEOUT = float(os.environ.get("HADITH_MCP_TIMEOUT", "30"))
 THROTTLE = float(os.environ.get("HADITH_MCP_THROTTLE", "1.2"))
 RETRIES = int(os.environ.get("HADITH_MCP_RETRIES", "3"))
 
-_UA = "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0"
+
+class HadithError(SiteError):
+    """Any failure while talking to hadith.inoor.ir."""
 
 
-class HadithError(RuntimeError):
-    pass
+class HadithClient(SiteClient):
+    name = "hadith"
+    error = HadithError
 
-
-class HadithClient:
     def __init__(self, auth_token: str | None = None) -> None:
         self._auth = auth_token or os.environ.get("HADITH_MCP_AUTH", "")
-        use_proxy = os.environ.get("NOORLIB_MCP_USE_PROXY", "").strip() in (
-            "1", "true", "TRUE", "yes",
-        )
-        headers = {
-            "User-Agent": _UA,
+        headers: dict[str, str] = {
             "Origin": BASE_URL,
             "Referer": BASE_URL + "/",
-            "Accept": "application/json, text/plain, */*",
         }
         if self._auth:
             token = self._auth.strip()
             if not token.lower().startswith("bearer"):
                 token = "Bearer " + token
             headers["Authorization"] = token
-        self._client = httpx.AsyncClient(
-            base_url=BASE_URL,
-            headers=headers,
+        super().__init__(
+            BASE_URL,
             timeout=TIMEOUT,
-            trust_env=use_proxy,
-            verify=True,
-            follow_redirects=True,
+            throttle=THROTTLE,
+            retries=RETRIES,
+            headers=headers,
         )
-        self._last_request = 0.0
-        self._lock = asyncio.Lock()
 
-    async def _throttle(self) -> None:
-        async with self._lock:
-            now = time.monotonic()
-            wait = THROTTLE - (now - self._last_request)
-            if wait > 0:
-                await asyncio.sleep(wait)
-            self._last_request = time.monotonic()
-
-    async def _request(self, method: str, path: str, **kw: Any) -> dict:
-        payload = kw.pop("payload", None)
-        params = kw.pop("params", None)
-        last_exc: Exception | None = None
-        last_body = ""
-
-        for attempt in range(1, RETRIES + 1):
-            await self._throttle()
-            try:
-                if method == "POST":
-                    resp = await self._client.post(path, json=payload)
-                else:
-                    resp = await self._client.get(path, params=params)
-            except httpx.HTTPError as exc:
-                raise HadithError(
-                    f"network error calling {method} {path} "
-                    f"(attempt {attempt}/{RETRIES}): {type(exc).__name__}: {exc} "
-                    f"— hint: this client ignores http_proxy unless "
-                    f"NOORLIB_MCP_USE_PROXY=1"
-                ) from exc
-
-            if resp.status_code == 429 or 500 <= resp.status_code < 600:
-                last_body = resp.text[:300]
-                last_exc = HadithError(
-                    f"server busy (HTTP {resp.status_code}) attempt {attempt}/{RETRIES}"
-                )
-                await asyncio.sleep(min(2.0 * attempt, 6.0))
-                continue
-            if resp.status_code != 200:
-                raise HadithError(
-                    f"HTTP {resp.status_code} from {path}: {resp.text[:300]}"
-                )
-            try:
-                data = resp.json()
-            except ValueError as exc:
-                raise HadithError(
-                    f"non-JSON response from {path}: {resp.text[:300]}"
-                ) from exc
-            # API signals failures with status<0 and an exception message
-            if data.get("status") is not None and data.get("status") < 0:
-                raise HadithError(
+    def _after_json(self, data: Any, path: str) -> Any:
+        if isinstance(data, dict):
+            status = data.get("status")
+            if isinstance(status, (int, float)) and status < 0:
+                raise self.error(
                     f"API error from {path}: {data.get('message') or data.get('exception') or data}"
                 )
-            return data
-
-        raise HadithError(
-            f"request failed after {RETRIES} attempts: {last_exc} last body: {last_body}"
-        )
-
-    async def close(self) -> None:
-        await self._client.aclose()
+            if data.get("isSuccess") is False:
+                raise self.error(f"API error from {path}: {data.get('message') or data}")
+        return data
 
     # ------------------------------------------------------------ endpoints
     async def sources(self, page_size: int = 900, page_number: int = 1) -> list[dict]:
@@ -137,6 +76,8 @@ class HadithClient:
                 "pageSize": page_size,
             },
         )
+        if not isinstance(data, dict):
+            return []
         return (data.get("data") or {}).get("resultList") or []
 
     async def search(
@@ -174,6 +115,8 @@ class HadithClient:
         data = await self._request(
             "POST", "/service/api/elastic/v2/ElasticHadithList", payload=payload
         )
+        if not isinstance(data, dict):
+            return {}
         return data.get("data") or {}
 
     async def hadith_by_id(
@@ -192,15 +135,19 @@ class HadithClient:
                 "searchIn": search_in,
             },
         )
-        return data.get("data") or []
+        if not isinstance(data, list):
+            return []
+        return data
 
     async def toc(self, source_id: int) -> list[dict]:
-        """TOC nodes of a source (GET)."""
+        """TOC nodes of a source (GET). Empty list when the source has no TOC."""
         data = await self._request(
             "GET",
             "/service/api/hadith/TocListBySource",
             params={"language": "fa", "sourceId": source_id},
         )
+        if not isinstance(data, dict):
+            return []
         return data.get("data") or []
 
     async def related(self, hadith_id: int, source_id: int) -> list[dict]:
@@ -214,7 +161,12 @@ class HadithClient:
                 "sourceId": source_id,
             },
         )
-        d = data.get("data")
+        d = data.get("data") if isinstance(data, dict) else None
         if isinstance(d, dict):
             return d.get("resultList") or d.get("results") or []
-        return d or []
+        if isinstance(d, list):
+            return d
+        return []
+
+
+__all__ = ["HadithClient", "HadithError"]
