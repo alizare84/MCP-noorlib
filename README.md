@@ -57,7 +57,7 @@
 ```bash
 cd ~/MCP-noorlib
 python3 -m venv .venv
-.venv/bin/pip install -e .
+.venv/bin/pip install noorlib_mcp-3.1.0-py3-none-any.whl
 ```
 
 سه فرمان `noor-mcp`، `noorlib-mcp` و `arsh-alrahman` همان سرور را اجرا می‌کنند. در پیکربندی کلاینت MCP مسیر مطلق یکی از آن‌ها را بگذارید:
@@ -189,7 +189,7 @@ One MCP server for the seven Noor-family databases. An agent can search, browse,
 ```bash
 cd ~/MCP-noorlib
 python3 -m venv .venv
-.venv/bin/pip install -e .
+.venv/bin/pip install noorlib_mcp-3.1.0-py3-none-any.whl
 ```
 
 `noor-mcp`, `noorlib-mcp`, and `arsh-alrahman` start the same server. Point the MCP client at the absolute path of one of them:
@@ -308,7 +308,7 @@ The package is one client per site, a shared HTTP core in `siteclient.py`, the M
 ```bash
 cd ~/MCP-noorlib
 python3 -m venv .venv
-.venv/bin/pip install -e .
+.venv/bin/pip install noorlib_mcp-3.1.0-py3-none-any.whl
 ```
 
 الأوامر `noor-mcp` و`noorlib-mcp` و`arsh-alrahman` تشغّل الخادم نفسه. ضع في إعداد عميل MCP المسار المطلق لأحدها:
