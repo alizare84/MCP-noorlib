@@ -63,6 +63,18 @@ class NoorlibClient(SiteClient):
             headers=headers,
         )
 
+    def _transient_payload(self, data: Any) -> str | None:
+        if not isinstance(data, dict) or data.get("isSuccess") is not False:
+            return None
+        code = data.get("statusCode")
+        try:
+            code_i = int(code)
+        except (TypeError, ValueError):
+            code_i = 0
+        if 500 <= code_i < 600:
+            return str(data.get("message") or data)
+        return None
+
     def _after_json(self, data: Any, path: str) -> Any:
         if isinstance(data, dict):
             if data.get("isSuccess") is False and data.get("statusCode") not in (200, None):

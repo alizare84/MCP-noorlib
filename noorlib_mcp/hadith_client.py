@@ -135,6 +135,11 @@ class HadithClient(SiteClient):
                 "searchIn": search_in,
             },
         )
+        # Live API (2026-11) returns the usual envelope
+        # {"status", "isSuccess", "data": [...]}. Older deployments
+        # returned the list itself. Both are accepted.
+        if isinstance(data, dict):
+            data = data.get("data")
         if not isinstance(data, list):
             return []
         return data

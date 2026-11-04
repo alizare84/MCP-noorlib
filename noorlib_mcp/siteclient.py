@@ -3,7 +3,8 @@
 Policies (shared by every site client):
 
 * transient network errors ARE retried (timeouts, connect/reset, protocol
-  errors) — not only 429/5xx
+  errors) — not only 429/5xx. A subclass may also mark an HTTP 200 body
+  as transient (noorlib's inner 503) via `_transient_payload`
 * 429/5xx retried with Retry-After + jitter; NO pointless sleep after the
   last attempt
 * per-host throttle: requests are spaced by `throttle` seconds WITHOUT
@@ -14,8 +15,8 @@ Policies (shared by every site client):
 * base_url must be https://
 * User-Agent override: NOORLIB_MCP_UA (default keeps a browser UA because
   some endpoints reject unknown clients)
-* subclasses customize `error` (exception class) and `_after_json()`
-  (per-site API status conventions)
+* subclasses customize `error` (exception class), `_transient_payload()`
+  and `_after_json()` (per-site API status conventions)
 """
 
 from __future__ import annotations
@@ -171,6 +172,17 @@ class SiteClient:
                     f"[{self.name}] non-JSON response from {path}: "
                     f"«بدنه‌ی نامعتبر از سایت» {resp.text[:200]}"
                 ) from exc
+            transient = self._transient_payload(data)
+            if transient:
+                last_body = transient[:200]
+                last_exc = self.error(
+                    f"[{self.name}] transient API status on attempt "
+                    f"{attempt}/{self.retries}: {transient}"
+                )
+                if attempt >= self.retries:
+                    break
+                await self._backoff(attempt)
+                continue
             return self._after_json(data, path)
 
         raise self.error(
@@ -178,6 +190,14 @@ class SiteClient:
             f"calling {path}; last error: {last_exc}; "
             f"last body «بدنه‌ی نامعتبر از سایت»: {last_body}"
         )
+
+    def _transient_payload(self, data: Any) -> str | None:
+        """Message when an HTTP 200 body is a retryable upstream failure.
+
+        noorlib sometimes answers 200 with a 503 from an inner service.
+        Subclasses detect that shape; the default is to trust the body.
+        """
+        return None
 
     def _after_json(self, data: Any, path: str) -> Any:
         """Per-site hook: validate API-level status conventions."""

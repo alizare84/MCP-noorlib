@@ -328,19 +328,33 @@ async def noorlib_search(
 
     books = []
     for grp in data.get("resultList", []):
-        if grp.get("type") != "book":
+        if not isinstance(grp, dict):
             continue
-        items = grp.get("itemList") or ([grp] if grp.get("bookId") else [])
+        # The search fleet alternates between two shapes:
+        # nested groups tagged type=book, and flat book objects with no type.
+        kind = grp.get("type")
+        if kind not in (None, "", "book"):
+            continue
+        nested = grp.get("itemList")
+        if isinstance(nested, list) and nested:
+            items = nested
+        elif grp.get("bookId"):
+            items = [grp]
+        else:
+            continue
         for it in items:
             snippet = ""
-            snips = it.get("snippetList") or []
+            snips = [s for s in (it.get("snippetList") or []) if isinstance(s, dict)]
             if snips:
-                s0 = snips[0]
+                s0 = next((s for s in snips if (s.get("text") or "").strip()), snips[0])
+                body = strip_em(s0.get("text") or "")
+                if not body and s0.get("imageUrl"):
+                    body = s0.get("imageUrl")
                 snippet = "p{} s{} v{}: {}".format(
                     s0.get("pageNumber"),
                     s0.get("sectionNumber"),
                     s0.get("volumeNumber"),
-                    strip_em(s0.get("text") or ""),
+                    body,
                 )
             books.append(
                 {
@@ -1014,7 +1028,7 @@ async def quran_surahs() -> str:
                     "title": s.get("Title"),
                     "names": s.get("PopularNames"),
                     "ayahCount": s.get("AyahCount"),
-                    "juz": s.get("FallPriority"),
+                    "juz": s.get("JuzNumber"),
                 }
                 for s in rows
             ],
@@ -1509,6 +1523,7 @@ async def qamus_dictionaries(page_number: int = 1, page_size: int = 20, query: s
             "dictionaries": [
                 {
                     "bookId": b.get("bookId"),
+                    "title": strip_em(b.get("title") or ""),
                     "link": b.get("link"),
                     "creators": [c.get("name") for c in (b.get("creatorList") or [])],
                     "language": [lang.get("name") for lang in (b.get("languageList") or [])],

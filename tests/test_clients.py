@@ -281,3 +281,73 @@ async def test_shared_http_core_retries_server_errors(monkeypatch):
 
     assert len(calls) == 2
     assert result == {"ok": True}
+
+
+@pytest.mark.asyncio
+async def test_hadith_by_id_unwraps_envelope(monkeypatch):
+    """ElasticHadithById returns {data: [...], status, isSuccess}, not a bare list."""
+    requests = _mock_transport(
+        monkeypatch,
+        lambda request: httpx.Response(
+            200,
+            json={
+                "data": [{"hadithId": 236718, "text": "<Hadith>متن حدیث</Hadith>"}],
+                "status": 1,
+                "isSuccess": True,
+            },
+        ),
+    )
+    client = HadithClient()
+    try:
+        rows = await client.hadith_by_id([236718])
+    finally:
+        await client.close()
+
+    request = requests[0]
+    assert request.url.path == "/service/api/elastic/ElasticHadithById"
+    assert json.loads(request.content)["hadithId"] == [236718]
+    assert rows and rows[0]["hadithId"] == 236718
+
+
+@pytest.mark.asyncio
+async def test_hadith_by_id_accepts_bare_list(monkeypatch):
+    _mock_transport(
+        monkeypatch,
+        lambda request: httpx.Response(200, json=[{"hadithId": 5, "text": "..."}]),
+    )
+    client = HadithClient()
+    try:
+        rows = await client.hadith_by_id([5])
+    finally:
+        await client.close()
+    assert rows and rows[0]["hadithId"] == 5
+
+
+@pytest.mark.asyncio
+async def test_noorlib_retries_microservice_503_inside_http_200(monkeypatch):
+    calls = []
+
+    def respond(request):
+        calls.append(request)
+        if len(calls) == 1:
+            return httpx.Response(
+                200,
+                json={"isSuccess": False, "statusCode": 503, "message": "service down"},
+            )
+        return httpx.Response(200, json={"isSuccess": True, "data": {"resultList": []}})
+
+    _mock_transport(monkeypatch, respond)
+
+    async def no_sleep(*_args, **_kwargs):
+        return None
+
+    monkeypatch.setattr("noorlib_mcp.siteclient.asyncio.sleep", no_sleep)
+    client = NoorlibClient()
+    client.throttle = 0
+    try:
+        result = await client.search("فصوص")
+    finally:
+        await client.close()
+
+    assert len(calls) == 2
+    assert result == {"resultList": []}
