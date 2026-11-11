@@ -9,6 +9,7 @@ Currently serves:
 * qamus.inoor.ir — لغت‌نامه قاموس نور
 * noordoc.ir — پایگاه پایان‌نامه‌های علوم اسلامی و انسانی
 * tarikh.inoor.ir — پایگاه جامع تاریخ
+* ganjoor.net — گنجور (شاعران، کتاب‌ها و متن شعر)
 
 Compatible with the official ``mcp`` SDK 1.x AND 2.x:
 
@@ -33,6 +34,7 @@ from urllib.parse import quote
 
 from .client import NoorlibClient, NoorlibError
 from .decoder import DecodeError, decode_page_html
+from .ganjoor_client import GanjoorClient
 from .hadith_client import HadithClient, HadithError
 from .noordoc_client import NoordocClient
 from .qamus_client import QamusClient
@@ -114,7 +116,7 @@ def _build_server():
             "noorlib.ir (کتابخانه دیجیتال نور), hadith.inoor.ir "
             "(جامع‌الاحادیث), quran.inoor.ir (قرآن), wikinoor.ir (دانشنامه), "
             "qamus.inoor.ir (لغت‌نامه), noordoc.ir (پایان‌نامه‌ها), "
-            "tarikh.inoor.ir (تاریخ). "
+            "tarikh.inoor.ir (تاریخ), ganjoor.net (گنجور). "
             "noorlib: noorlib_search -> noorlib_book_info -> noorlib_book_toc -> "
             "noorlib_book_page, or noorlib_search_in_book for snippets. "
             "hadith: hadith_search -> hadith_by_id; hadith_sources lists books; "
@@ -125,7 +127,8 @@ def _build_server():
             "wikinoor: wikinoor_search -> wikinoor_page. "
             "qamus: qamus_search / qamus_autocomplete -> qamus_word. "
             "noordoc: noordoc_search -> noordoc_thesis / noordoc_thesis_pages. "
-            "tarikh: tarikh_search / tarikh_event / tarikh_today."
+            "tarikh: tarikh_search / tarikh_event / tarikh_today. "
+            "ganjoor: ganjoor_search یا ganjoor_poets -> ganjoor_category -> ganjoor_poem."
         ),
         lifespan=_lifespan,
     )
@@ -239,6 +242,7 @@ _wikinoor_client: WikinoorClient | None = None
 _qamus_client: QamusClient | None = None
 _noordoc_client: NoordocClient | None = None
 _tarikh_client: TarikhClient | None = None
+_ganjoor_client: GanjoorClient | None = None
 
 
 def _cl() -> NoorlibClient:
@@ -288,6 +292,13 @@ def _tcl() -> TarikhClient:
     if _tarikh_client is None:
         _tarikh_client = _reg(TarikhClient())
     return _tarikh_client
+
+
+def _gcl() -> GanjoorClient:
+    global _ganjoor_client
+    if _ganjoor_client is None:
+        _ganjoor_client = _reg(GanjoorClient())
+    return _ganjoor_client
 
 
 def _err(exc: Exception) -> str:
@@ -1900,6 +1911,287 @@ async def noordoc_thesis_pages(thesis_id: int, limit: int = 20) -> str:
         ensure_ascii=False,
         indent=1,
     )
+
+
+def _ganjoor_url(path: str | None, fallback_id: int | None = None) -> str:
+    text = (path or "").strip()
+    if text.startswith("http://") or text.startswith("https://"):
+        return text
+    if text:
+        return "https://ganjoor.net" + (text if text.startswith("/") else "/" + text)
+    if fallback_id:
+        return f"https://ganjoor.net/?p={fallback_id}"
+    return "https://ganjoor.net"
+
+
+def _poem_text(poem: dict) -> str:
+    verses = poem.get("verses") or []
+    lines = [
+        str(verse.get("text")).strip()
+        for verse in verses
+        if isinstance(verse, dict) and str(verse.get("text") or "").strip()
+    ]
+    if lines:
+        return "\n".join(lines)
+    plain = str(poem.get("plainText") or "").replace("\r\n", "\n").replace("\r", "\n").strip()
+    if plain:
+        return plain
+    return html_to_text(poem.get("htmlText") or "")
+
+
+def _poem_record(poem: dict, *, max_length: int) -> dict:
+    text, truncated = _clip(_poem_text(poem), max_length)
+    cat = poem.get("category") if isinstance(poem.get("category"), dict) else {}
+    poet = cat.get("poet") if isinstance(cat.get("poet"), dict) else {}
+    return {
+        "poemId": poem.get("id"),
+        "title": poem.get("title"),
+        "fullTitle": poem.get("fullTitle"),
+        "poet": poet.get("nickname") or poet.get("name"),
+        "poetId": poet.get("id"),
+        "text": text,
+        "truncated": truncated,
+        "url": _ganjoor_url(poem.get("fullUrl"), poem.get("id")),
+    }
+
+
+def _poet_row(poet: dict) -> dict:
+    return {
+        "poetId": poet.get("id"),
+        "name": poet.get("name"),
+        "nickname": poet.get("nickname"),
+        "rootCatId": poet.get("rootCatId"),
+        "birthYear": poet.get("birthYearInLHijri"),
+        "birthYearExact": poet.get("validBirthDate"),
+        "deathYear": poet.get("deathYearInLHijri"),
+        "deathYearExact": poet.get("validDeathDate"),
+        "url": _ganjoor_url(poet.get("fullUrl")),
+    }
+
+
+# -------------------------------------------------------------- ganjoor tools
+@_tool()
+async def ganjoor_poets(query: str = "") -> str:
+    """فهرست شاعران گنجور (ganjoor.net).
+
+    query فیلتر محلی روی نام و تخلص است. خالی یعنی همهٔ شاعران منتشرشده.
+    rootCatId را به ganjoor_category بدهید تا کتاب‌ها و بخش‌ها را ببینید.
+
+    Args:
+        query: بخشی از نام یا تخلص، مثل «حافظ» یا «سعدی»
+    """
+    try:
+        rows = await _gcl().poets()
+    except SiteError as exc:
+        return _err(exc)
+    needle = fold_arabic(query.strip())
+    if needle:
+        rows = [
+            poet
+            for poet in rows
+            if isinstance(poet, dict)
+            and (
+                needle in fold_arabic(poet.get("name") or "")
+                or needle in fold_arabic(poet.get("nickname") or "")
+            )
+        ]
+    poets = [_poet_row(poet) for poet in rows if isinstance(poet, dict)]
+    return json.dumps(
+        {"query": query, "total": len(poets), "poets": poets},
+        ensure_ascii=False,
+        indent=1,
+    )
+
+
+@_tool()
+async def ganjoor_poet(poet_id: int) -> str:
+    """یک شاعر گنجور به‌همراه بخش‌های ریشه (کتاب‌ها).
+
+    Args:
+        poet_id: شناسه شاعر از ganjoor_poets
+    """
+    if err := _positive_id(poet_id, "poet_id"):
+        return err
+    try:
+        data = await _gcl().poet(poet_id)
+    except SiteError as exc:
+        return _err(exc)
+    poet = data.get("poet") if isinstance(data.get("poet"), dict) else data
+    if not isinstance(poet, dict) or not poet.get("id"):
+        return _err(SiteError(f"poet {poet_id} not found"))
+    cat = data.get("cat") if isinstance(data.get("cat"), dict) else {}
+    children = [
+        {
+            "catId": child.get("id"),
+            "title": child.get("title"),
+            "url": _ganjoor_url(child.get("fullUrl")),
+        }
+        for child in (cat.get("children") or [])
+        if isinstance(child, dict)
+    ][:40]
+    description, truncated = _clip(str(poet.get("description") or "").strip(), 2000)
+    record = _poet_row(poet)
+    record["description"] = description
+    record["descriptionTruncated"] = truncated
+    record["sections"] = children
+    return json.dumps(record, ensure_ascii=False, indent=1)
+
+
+@_tool()
+async def ganjoor_category(cat_id: int) -> str:
+    """یک بخش گنجور: زیربخش‌ها و فهرست شعرها.
+
+    Args:
+        cat_id: شناسه بخش از ganjoor_poet (rootCatId یا sections) یا از یک شعر
+    """
+    if err := _positive_id(cat_id, "cat_id"):
+        return err
+    try:
+        cat = await _gcl().category(cat_id)
+    except SiteError as exc:
+        return _err(exc)
+    if not cat.get("id"):
+        return _err(SiteError(f"category {cat_id} not found"))
+    children = [
+        {"catId": child.get("id"), "title": child.get("title"), "url": _ganjoor_url(child.get("fullUrl"))}
+        for child in (cat.get("children") or [])
+        if isinstance(child, dict)
+    ][:40]
+    poems = [
+        {
+            "poemId": poem.get("id"),
+            "title": poem.get("title"),
+            "excerpt": str(poem.get("excerpt") or "")[:180],
+        }
+        for poem in (cat.get("poems") or [])
+        if isinstance(poem, dict)
+    ][:30]
+    return json.dumps(
+        {
+            "catId": cat.get("id"),
+            "title": cat.get("title"),
+            "url": _ganjoor_url(cat.get("fullUrl")),
+            "children": children,
+            "poems": poems,
+            "hint": "poemId را به ganjoor_poem و catId فرزند را دوباره به ganjoor_category بدهید",
+        },
+        ensure_ascii=False,
+        indent=1,
+    )
+
+
+@_tool()
+async def ganjoor_search(
+    term: str,
+    page_number: int = 1,
+    page_size: int = 5,
+    poet_id: int = 0,
+    cat_id: int = 0,
+) -> str:
+    """جستجوی متن شعر در گنجور.
+
+    poet_id و cat_id اختیاری‌اند. صفر یعنی بدون آن فیلتر.
+
+    Args:
+        term: عبارت، مثل «الا یا ایها الساقی»
+        page_number: صفحه نتایج
+        page_size: تعداد نتیجه
+        poet_id: محدود به یک شاعر (۰ = همه)
+        cat_id: محدود به یک بخش (۰ = همه)
+    """
+    if err := _required_text(term, "term"):
+        return err
+    page_number = _pos(page_number)
+    page_size = _cap(page_size, 5, 10)
+    poet_id = _nonneg(poet_id)
+    cat_id = _nonneg(cat_id)
+    try:
+        rows = await _gcl().search(
+            term,
+            page_number=page_number,
+            page_size=page_size,
+            poet_id=poet_id,
+            cat_id=cat_id,
+        )
+    except SiteError as exc:
+        return _err(exc)
+    hits = []
+    for poem in rows:
+        if not isinstance(poem, dict):
+            continue
+        snippet = str(poem.get("plainText") or poem.get("excerpt") or "")
+        snippet = " ".join(snippet.split())[:180]
+        hits.append(
+            {
+                "poemId": poem.get("id"),
+                "title": poem.get("title") or poem.get("fullTitle"),
+                "snippet": snippet,
+                "url": _ganjoor_url(poem.get("fullUrl"), poem.get("id")),
+            }
+        )
+    return json.dumps(
+        {
+            "term": term,
+            "pageNumber": page_number,
+            "returned": len(hits),
+            "poems": hits,
+            "hint": "poemId را به ganjoor_poem بدهید برای متن کامل",
+        },
+        ensure_ascii=False,
+        indent=1,
+    )
+
+
+@_tool()
+async def ganjoor_poem(poem_id: int, max_length: int = 8000) -> str:
+    """متن یک شعر گنجور، بیت به بیت.
+
+    Args:
+        poem_id: شناسه شعر از ganjoor_search یا ganjoor_category
+        max_length: سقف طول متن؛ ۰ یعنی بدون برش تا ۳۰۰۰۰ نویسه
+    """
+    if err := _positive_id(poem_id, "poem_id"):
+        return err
+    max_length = _budget(max_length, 8000)
+    try:
+        poem = await _gcl().poem(poem_id)
+    except SiteError as exc:
+        return _err(exc)
+    if not poem.get("id"):
+        return _err(SiteError(f"poem {poem_id} not found"))
+    return json.dumps(_poem_record(poem, max_length=max_length), ensure_ascii=False, indent=1)
+
+
+@_tool()
+async def ganjoor_hafez_faal(max_length: int = 4000) -> str:
+    """یک غزل تصادفی از حافظ (فال حافظ در گنجور)."""
+    max_length = _budget(max_length, 4000)
+    try:
+        poem = await _gcl().hafez_faal()
+    except SiteError as exc:
+        return _err(exc)
+    if not poem.get("id"):
+        return _err(SiteError("hafez faal returned no poem"))
+    return json.dumps(_poem_record(poem, max_length=max_length), ensure_ascii=False, indent=1)
+
+
+@_tool()
+async def ganjoor_random(poet_id: int = 0, max_length: int = 4000) -> str:
+    """یک شعر تصادفی از گنجور. poet_id صفر یعنی از همهٔ شاعران.
+
+    Args:
+        poet_id: شناسه شاعر، یا ۰ برای همه
+        max_length: سقف طول متن
+    """
+    poet_id = _nonneg(poet_id)
+    max_length = _budget(max_length, 4000)
+    try:
+        poem = await _gcl().random_poem(poet_id)
+    except SiteError as exc:
+        return _err(exc)
+    if not poem.get("id"):
+        return _err(SiteError("random poem returned no poem"))
+    return json.dumps(_poem_record(poem, max_length=max_length), ensure_ascii=False, indent=1)
 
 
 def main() -> None:

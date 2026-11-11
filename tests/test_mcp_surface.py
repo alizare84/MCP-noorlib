@@ -30,7 +30,9 @@ def _hint(annotations: dict, snake: str, camel: str):
 async def test_catalog_is_ready_for_an_llm():
     tools = await mcp.list_tools()
     names = [tool.name for tool in tools]
-    assert len(names) == 29
+    assert len(names) == 36
+    assert "ganjoor_poem" in names
+    assert "ganjoor_search" in names
     assert len(names) == len(set(names))
     for tool in tools:
         data = tool.model_dump()
@@ -50,6 +52,30 @@ async def test_catalog_is_ready_for_an_llm():
     assert "noorlib_search" in instructions
     assert "hadith_by_id" in instructions
     assert "quran_surah_text" in instructions
+    assert "ganjoor_poem" in instructions
+
+
+@pytest.mark.asyncio
+async def test_ganjoor_poem_uses_plain_text_when_verses_are_absent(monkeypatch):
+    from noorlib_mcp import server as srv
+
+    class FakeGanjoor:
+        async def poem(self, poem_id):
+            return {
+                "id": poem_id,
+                "title": "غزل",
+                "fullUrl": "/hafez/ghazal/sh1",
+                "plainText": "الا یا ایها الساقی\r\nادر کأسا",
+                "verses": [],
+                "category": {"poet": {"id": 2, "nickname": "حافظ"}},
+            }
+
+    monkeypatch.setattr(srv, "_gcl", lambda: FakeGanjoor())
+    data = json.loads(await srv.ganjoor_poem(2130, max_length=100))
+    assert data["poet"] == "حافظ"
+    assert "الا یا ایها الساقی" in data["text"]
+    assert "\r" not in data["text"]
+    assert data["url"] == "https://ganjoor.net/hafez/ghazal/sh1"
 
 
 @pytest.mark.asyncio

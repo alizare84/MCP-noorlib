@@ -4,6 +4,7 @@ import httpx
 import pytest
 
 from noorlib_mcp.client import NoorlibClient
+from noorlib_mcp.ganjoor_client import GanjoorClient
 from noorlib_mcp.hadith_client import HadithClient
 from noorlib_mcp.noordoc_client import NoordocClient
 from noorlib_mcp.qamus_client import QamusClient
@@ -351,3 +352,42 @@ async def test_noorlib_retries_microservice_503_inside_http_200(monkeypatch):
 
     assert len(calls) == 2
     assert result == {"resultList": []}
+
+
+@pytest.mark.asyncio
+async def test_ganjoor_search_and_poem(monkeypatch):
+    def respond(request):
+        if request.url.path == "/api/ganjoor/poems/search":
+            return httpx.Response(
+                200,
+                json=[{"id": 2130, "title": "غزل شماره ۱", "fullUrl": "/hafez/ghazal/sh1", "plainText": "الا یا ایها الساقی"}],
+            )
+        return httpx.Response(
+            200,
+            json={
+                "id": 2130,
+                "title": "غزل شماره ۱",
+                "fullUrl": "/hafez/ghazal/sh1",
+                "verses": [{"text": "الا یا ایها الساقی"}, {"text": "ادر کاسا و ناولها"}],
+                "category": {"poet": {"id": 2, "nickname": "حافظ"}},
+            },
+        )
+
+    requests = _mock_transport(monkeypatch, respond)
+    client = GanjoorClient()
+    client.throttle = 0
+    try:
+        found = await client.search("ساقی", page_number=1, page_size=5, poet_id=2)
+        poem = await client.poem(2130)
+    finally:
+        await client.close()
+
+    params = requests[0].url.params
+    assert requests[0].url.path == "/api/ganjoor/poems/search"
+    assert params["term"] == "ساقی"
+    assert params["poetId"] == "2"
+    assert params["PageSize"] == "5"
+    assert found[0]["id"] == 2130
+    assert requests[1].url.path == "/api/ganjoor/poem/2130"
+    assert requests[1].url.params["comments"] == "false"
+    assert poem["verses"][0]["text"] == "الا یا ایها الساقی"

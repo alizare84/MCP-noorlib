@@ -2,7 +2,7 @@
 
 [فارسی](#فارسی) | [English](#english) | [العربية](#العربية)
 
-سرور MCP برای هفت پایگاه خانوادهٔ نور. جستجو، فهرست، متن، ترجمه و تفسیر از یک ورودی در اختیار عامل زبانی قرار می‌گیرد.
+سرور MCP برای هفت پایگاه خانوادهٔ نور، به‌علاوهٔ گنجور. جستجو، فهرست، متن، ترجمه، تفسیر و شعر از یک ورودی در اختیار عامل زبانی قرار می‌گیرد.
 
 این پروژه مستقل است و از رابط عمومی همان وب‌سایت‌ها استفاده می‌کند. با کتابخانهٔ `mcp` نسخهٔ ۱ و ۲ سازگار است.
 
@@ -17,6 +17,7 @@
 | **qamus.inoor.ir** — لغت‌نامهٔ قاموس نور | ۳۶۹ هزار واژه، ۱۶۳ فرهنگ | ۴ ابزار `qamus_*` |
 | **noordoc.ir** — پایگاه پایان‌نامه‌ها | ۱۴۹ هزار پایان‌نامه | ۳ ابزار `noordoc_*` |
 | **tarikh.inoor.ir** — پایگاه جامع تاریخ | صدها هزار رویداد | ۳ ابزار `tarikh_*` |
+| **ganjoor.net** — گنجور | شاعران، کتاب‌ها و متن شعر | ۷ ابزار `ganjoor_*` |
 
 ### ابزارها
 
@@ -51,13 +52,20 @@
 | `tarikh_search` | جستجوی رویداد |
 | `tarikh_event` | شرح رویداد و منابع گزارش |
 | `tarikh_today` | رویدادهای امروز در تقویم قمری |
+| `ganjoor_poets` | فهرست شاعران، با فیلتر نام |
+| `ganjoor_poet` | یک شاعر و بخش‌های کتاب‌هایش |
+| `ganjoor_category` | زیربخش‌ها و فهرست شعرهای یک بخش |
+| `ganjoor_search` | جستجوی متن شعر، با فیلتر شاعر یا بخش |
+| `ganjoor_poem` | متن کامل یک شعر |
+| `ganjoor_hafez_faal` | یک غزل تصادفی از حافظ |
+| `ganjoor_random` | یک شعر تصادفی |
 
 ### استفاده
 
 ```bash
 cd ~/MCP-noorlib
 python3 -m venv .venv
-.venv/bin/pip install noorlib_mcp-3.1.0-py3-none-any.whl
+.venv/bin/pip install noorlib_mcp-3.2.0-py3-none-any.whl
 ```
 
 سه فرمان `noor-mcp`، `noorlib-mcp` و `arsh-alrahman` همان سرور را اجرا می‌کنند. در پیکربندی کلاینت MCP مسیر مطلق یکی از آن‌ها را بگذارید:
@@ -95,7 +103,7 @@ python3 -m venv .venv
 
 ### متغیرهای محیطی
 
-هر پایگاه پیشوند خودش را دارد: `NOORLIB_MCP_`، `HADITH_MCP_`، `QURAN_MCP_`، `WIKINOOR_MCP_`، `QAMUS_MCP_`، `NOORDOC_MCP_` و `TARIKH_MCP_`. کلیدهای مشترک `BASE_URL`، `TIMEOUT`، `THROTTLE` و `RETRIES` هستند.
+هر پایگاه پیشوند خودش را دارد: `NOORLIB_MCP_`، `HADITH_MCP_`، `QURAN_MCP_`، `WIKINOOR_MCP_`، `QAMUS_MCP_`، `NOORDOC_MCP_`، `TARIKH_MCP_` و `GANJOOR_MCP_`. کلیدهای مشترک `BASE_URL`، `TIMEOUT`، `THROTTLE` و `RETRIES` هستند.
 
 | متغیر | پیش‌فرض | نقش |
 |---|---|---|
@@ -132,13 +140,14 @@ noorlib_mcp/
 ├── qamus_client.py
 ├── noordoc_client.py
 ├── tarikh_client.py
+├── ganjoor_client.py
 ├── textutil.py
 └── decoder.py
 ```
 
 ## English
 
-One MCP server for the seven Noor-family databases. An agent can search, browse, and read text, translations, and commentary through a single connection.
+One MCP server for the seven Noor-family databases, plus Ganjoor. An agent can search, browse, and read text, translations, commentary, and Persian poetry through a single connection.
 
 | Site | Coverage | Tools |
 |---|---|---|
@@ -149,6 +158,7 @@ One MCP server for the seven Noor-family databases. An agent can search, browse,
 | **qamus.inoor.ir** | 369,000 entries, 163 dictionaries | 4 `qamus_*` |
 | **noordoc.ir** | 149,000 theses | 3 `noordoc_*` |
 | **tarikh.inoor.ir** | Hundreds of thousands of events | 3 `tarikh_*` |
+| **ganjoor.net** | Poets, books, and poem text | 7 `ganjoor_*` |
 
 ### Tools
 
@@ -183,13 +193,20 @@ One MCP server for the seven Noor-family databases. An agent can search, browse,
 | `tarikh_search` | Search events |
 | `tarikh_event` | Event description and cited sources |
 | `tarikh_today` | Events for the current Hijri date |
+| `ganjoor_poets` | Poet catalogue, filterable by name |
+| `ganjoor_poet` | One poet and the sections of their books |
+| `ganjoor_category` | Child sections and the poems in one section |
+| `ganjoor_search` | Search poem text, optionally by poet or section |
+| `ganjoor_poem` | Full text of one poem |
+| `ganjoor_hafez_faal` | A random ghazal of Hafez |
+| `ganjoor_random` | A random poem |
 
 ### Use
 
 ```bash
 cd ~/MCP-noorlib
 python3 -m venv .venv
-.venv/bin/pip install noorlib_mcp-3.1.0-py3-none-any.whl
+.venv/bin/pip install noorlib_mcp-3.2.0-py3-none-any.whl
 ```
 
 `noor-mcp`, `noorlib-mcp`, and `arsh-alrahman` start the same server. Point the MCP client at the absolute path of one of them:
@@ -227,7 +244,7 @@ Noordoc exposes thesis metadata, abstracts, and page inventories. Page files and
 
 ### Environment
 
-Each site has its own prefix: `NOORLIB_MCP_`, `HADITH_MCP_`, `QURAN_MCP_`, `WIKINOOR_MCP_`, `QAMUS_MCP_`, `NOORDOC_MCP_`, and `TARIKH_MCP_`. Shared keys are `BASE_URL`, `TIMEOUT`, `THROTTLE`, and `RETRIES`.
+Each site has its own prefix: `NOORLIB_MCP_`, `HADITH_MCP_`, `QURAN_MCP_`, `WIKINOOR_MCP_`, `QAMUS_MCP_`, `NOORDOC_MCP_`, `TARIKH_MCP_`, and `GANJOOR_MCP_`. Shared keys are `BASE_URL`, `TIMEOUT`, `THROTTLE`, and `RETRIES`.
 
 | Variable | Default | Role |
 |---|---|---|
@@ -257,7 +274,7 @@ The package is one client per site, a shared HTTP core in `siteclient.py`, the M
 
 ## العربية
 
-خادم MCP واحد لقواعد عائلة نور السبع. يصل الوكيل إلى البحث والفهرس والنص والترجمة والتفسير من اتصال واحد.
+خادم MCP واحد لقواعد عائلة نور السبع، مع گنجور. يصل الوكيل إلى البحث والفهرس والنص والترجمة والتفسير والشعر من اتصال واحد.
 
 | الموقع | المحتوى | الأدوات |
 |---|---|---|
@@ -268,6 +285,7 @@ The package is one client per site, a shared HTTP core in `siteclient.py`, the M
 | **qamus.inoor.ir** | 369 ألف مدخل و163 معجماً | 4 أدوات `qamus_*` |
 | **noordoc.ir** | 149 ألف رسالة | 3 أدوات `noordoc_*` |
 | **tarikh.inoor.ir** | مئات آلاف الأحداث | 3 أدوات `tarikh_*` |
+| **ganjoor.net** | الشعراء والكتب ونص الشعر | 7 أدوات `ganjoor_*` |
 
 ### الأدوات
 
@@ -302,13 +320,20 @@ The package is one client per site, a shared HTTP core in `siteclient.py`, the M
 | `tarikh_search` | البحث في الأحداث |
 | `tarikh_event` | شرح الحدث ومصادره |
 | `tarikh_today` | أحداث اليوم بالتقويم الهجري |
+| `ganjoor_poets` | قائمة الشعراء مع تصفية بالاسم |
+| `ganjoor_poet` | شاعر واحد وأقسام كتبه |
+| `ganjoor_category` | الأقسام الفرعية وأشعار قسم |
+| `ganjoor_search` | البحث في نص الشعر، مع تصفية الشاعر أو القسم |
+| `ganjoor_poem` | النص الكامل لقصيدة |
+| `ganjoor_hafez_faal` | غزل عشوائي لحافظ |
+| `ganjoor_random` | قصيدة عشوائية |
 
 ### الاستخدام
 
 ```bash
 cd ~/MCP-noorlib
 python3 -m venv .venv
-.venv/bin/pip install noorlib_mcp-3.1.0-py3-none-any.whl
+.venv/bin/pip install noorlib_mcp-3.2.0-py3-none-any.whl
 ```
 
 الأوامر `noor-mcp` و`noorlib-mcp` و`arsh-alrahman` تشغّل الخادم نفسه. ضع في إعداد عميل MCP المسار المطلق لأحدها:
@@ -346,7 +371,7 @@ python3 -m venv .venv
 
 ### متغيرات البيئة
 
-لكل موقع بادئة: `NOORLIB_MCP_` و`HADITH_MCP_` و`QURAN_MCP_` و`WIKINOOR_MCP_` و`QAMUS_MCP_` و`NOORDOC_MCP_` و`TARIKH_MCP_`. المفاتيح المشتركة هي `BASE_URL` و`TIMEOUT` و`THROTTLE` و`RETRIES`.
+لكل موقع بادئة: `NOORLIB_MCP_` و`HADITH_MCP_` و`QURAN_MCP_` و`WIKINOOR_MCP_` و`QAMUS_MCP_` و`NOORDOC_MCP_` و`TARIKH_MCP_` و`GANJOOR_MCP_`. المفاتيح المشتركة هي `BASE_URL` و`TIMEOUT` و`THROTTLE` و`RETRIES`.
 
 | المتغير | الافتراضي | الدور |
 |---|---|---|

@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "noorlib-mcp"
 dynamic = ["version"]
-description = "عرش الرحمان — unified MCP server for the seven Noor-family sites: noorlib.ir, hadith.inoor.ir, quran.inoor.ir, wikinoor.ir, qamus.inoor.ir, noordoc.ir, tarikh.inoor.ir"
+description = "عرش الرحمان — unified MCP server for the Noor-family sites plus Ganjoor: noorlib.ir, hadith.inoor.ir, quran.inoor.ir, wikinoor.ir, qamus.inoor.ir, noordoc.ir, tarikh.inoor.ir, ganjoor.net"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -13,7 +13,7 @@ authors = [{ name = "noorlib-mcp contributors" }]
 keywords = [
     "mcp", "noorlib", "noor", "arsh", "arsh-alrahman", "islamic",
     "hadith", "quran", "tafsir", "library", "wikinoor", "qamus",
-    "noordoc", "tarikh",
+    "noordoc", "tarikh", "ganjoor", "poetry",
 ]
 classifiers = [
     "License :: OSI Approved :: MIT License",

@@ -1,7 +1,7 @@
 ---
 name: Noor Islamic text research
 description: Researches the Quran, hadith, classical Islamic books, Arabic and Persian dictionaries, theses, and Hijri history through the noorlib-mcp server. Use when the user asks about a verse, hadith, tafsir, Islamic book, scholar, Arabic or Persian term, thesis, or historical event in the Noor libraries.
-summary: Search seven Noor libraries, open the matching record, and answer with a quotation and a source link.
+summary: Search the Noor libraries and Ganjoor, open the matching record, and answer with a quotation and a source link.
 version: 1.0.0
 tags: islam, quran, hadith, tafsir, arabic, persian, research
 keywords: noorlib, quran, hadith, tafsir, islamic books, arabic dictionary, hijri history
@@ -13,7 +13,7 @@ docs_url: https://github.com/alizare84/MCP-noorlib
 
 Requires: the noorlib-mcp MCP server from https://github.com/alizare84/MCP-noorlib
 
-This skill is a research method. It does not contain the library texts. If the `noorlib_*`, `hadith_*`, `quran_*`, `wikinoor_*`, `qamus_*`, `noordoc_*`, or `tarikh_*` tools are missing, stop and ask the user to add this server, then wait:
+This skill is a research method. It does not contain the library texts. If the `noorlib_*`, `hadith_*`, `quran_*`, `wikinoor_*`, `qamus_*`, `noordoc_*`, `tarikh_*`, or `ganjoor_*` tools are missing, stop and ask the user to add this server, then wait:
 
 ```json
 {
@@ -39,6 +39,7 @@ This skill is a research method. It does not contain the library texts. If the `
 | A word, root, plural, or technical term | `qamus_search` |
 | A thesis or dissertation | `noordoc_search` |
 | A historical event or what happened on a Hijri date | `tarikh_search` or `tarikh_today` |
+| A Persian poem, a poet, or a Hafez fortune | `ganjoor_search` or `ganjoor_poets`, then `ganjoor_poem` |
 
 Search in the language of the source. Arabic and Persian queries both work. If a name may be misspelled, call `qamus_autocomplete` before `qamus_search`.
 
