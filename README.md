@@ -101,6 +101,8 @@ python3 -m venv .venv
 
 پایان‌نامه‌ها در noordoc تا سطح چکیده و فهرست صفحات در دسترس‌اند. فایل صفحه و PDF از این سرور ارائه نمی‌شود. پایگاه‌های دیگر در مسیر معمولی این پروژه به توکن نیاز ندارند.
 
+گنجور از API عمومی [api.ganjoor.net](https://api.ganjoor.net) خوانده می‌شود و توکن نمی‌خواهد. شناسهٔ حافظ **۲** است. مسیر کار: `ganjoor_search` یا `ganjoor_poets`، سپس `ganjoor_poem`. `ganjoor_hafez_faal` یک غزل تصادفی از حافظ برمی‌گرداند.
+
 ### متغیرهای محیطی
 
 هر پایگاه پیشوند خودش را دارد: `NOORLIB_MCP_`، `HADITH_MCP_`، `QURAN_MCP_`، `WIKINOOR_MCP_`، `QAMUS_MCP_`، `NOORDOC_MCP_`، `TARIKH_MCP_` و `GANJOOR_MCP_`. کلیدهای مشترک `BASE_URL`، `TIMEOUT`، `THROTTLE` و `RETRIES` هستند.
@@ -121,6 +123,8 @@ python3 -m venv .venv
 تمهید القواعد ۱۳۲۷ · شرح فصوص الحکم ۱۳۱۲ · نصوص الخصوص ۱۱۰۱۵ · کشف المراد ۱۲۳۶ · توضیح المراد ۱۱۹۸ · شوارق الإلهام ۱۴۱۵۹ · منشور جاودانه ۵۵۲۰۲ · نهج‌البلاغه ۳۵۴۲ · بحارالانوار ۲۵۶۴ · تجلیات الهیه ۱۲۲۷۶۲ · اسرار عرشیه ۱۲۲۷۶۰
 
 الکافی، متن کامل هشت جلد: **۱۳۴۸** · نهج‌البلاغة: ۱۵۷۵ · ترجمهٔ اصول کافی: ۲۶۴۶ · الروضة من الکافی: ۲۶۴۲
+
+حافظ در گنجور: **۲** · غزل «الا یا ایها الساقی»: ۲۱۳۰
 
 ### توسعه
 
@@ -242,6 +246,8 @@ A valid token with an empty balance still cannot open a charged page. Do not pub
 
 Noordoc exposes thesis metadata, abstracts, and page inventories. Page files and PDFs are not served. The other databases do not require a token on the flows this server documents.
 
+Ganjoor is read from the public API at [api.ganjoor.net](https://api.ganjoor.net) and needs no token. Hafez’s poet id is **2**. The usual path is `ganjoor_search` or `ganjoor_poets`, then `ganjoor_poem`. `ganjoor_hafez_faal` returns a random ghazal of Hafez.
+
 ### Environment
 
 Each site has its own prefix: `NOORLIB_MCP_`, `HADITH_MCP_`, `QURAN_MCP_`, `WIKINOOR_MCP_`, `QAMUS_MCP_`, `NOORDOC_MCP_`, `TARIKH_MCP_`, and `GANJOOR_MCP_`. Shared keys are `BASE_URL`, `TIMEOUT`, `THROTTLE`, and `RETRIES`.
@@ -262,6 +268,8 @@ Ambient proxy variables are ignored unless the proxy option is turned on.
 Tamhid al-Qawaid 1327 · Sharh Fusus al-Hikam 1312 · Nusus al-Khusus 11015 · Kashf al-Murad 1236 · Tawdih al-Murad 1198 · Shawariq al-Ilham 14159 · Manshur-i Javidana 55202 · Nahj al-Balagha 3542 · Bihar al-Anwar 2564 · Tajalliyat al-Ilahiyya 122762 · Asrar-i Arshiyya 122760
 
 Al-Kafi, complete eight volumes: **1348** · Nahj al-Balagha: 1575 · translation of Usul al-Kafi: 2646 · al-Rawda min al-Kafi: 2642
+
+Hafez on Ganjoor: **2** · the ghazal «الا یا ایها الساقی»: 2130
 
 ### Development
 
@@ -369,6 +377,8 @@ python3 -m venv .venv
 
 تُتاح في noordoc بيانات الرسالة وملخصها وجرد صفحاتها. ملفات الصفحات وPDF غير متاحة من هذا الخادم. لا تحتاج قواعد البيانات الأخرى إلى رمز في المسارات الموثّقة هنا.
 
+يُقرأ گنجور من الواجهة العامة [api.ganjoor.net](https://api.ganjoor.net) ومن غير رمز. معرّف حافظ **2**. المسار المعتاد هو `ganjoor_search` أو `ganjoor_poets` ثم `ganjoor_poem`. وتعيد `ganjoor_hafez_faal` غزلاً عشوائياً لحافظ.
+
 ### متغيرات البيئة
 
 لكل موقع بادئة: `NOORLIB_MCP_` و`HADITH_MCP_` و`QURAN_MCP_` و`WIKINOOR_MCP_` و`QAMUS_MCP_` و`NOORDOC_MCP_` و`TARIKH_MCP_` و`GANJOOR_MCP_`. المفاتيح المشتركة هي `BASE_URL` و`TIMEOUT` و`THROTTLE` و`RETRIES`.
@@ -389,6 +399,8 @@ python3 -m venv .venv
 تمهيد القواعد ١٣٢٧ · شرح فصوص الحكم ١٣١٢ · نصوص الخصوص ١١٠١٥ · كشف المراد ١٢٣٦ · توضيح المراد ١١٩٨ · شوارق الإلهام ١٤١٥٩ · منشور جاودانه ٥٥٢٠٢ · نهج البلاغة ٣٥٤٢ · بحار الأنوار ٢٥٦٤ · تجليات إلهية ١٢٢٧٦٢ · أسرار عرشية ١٢٢٧٦٠
 
 الكافي، النص الكامل في ثمانية مجلدات: **١٣٤٨** · نهج البلاغة: ١٥٧٥ · ترجمة أصول الكافي: ٢٦٤٦ · الروضة من الكافي: ٢٦٤٢
+
+حافظ في گنجور: **2** · غزل «الا یا ایها الساقی»: 2130
 
 ### التطوير
 
